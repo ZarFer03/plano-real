@@ -6,6 +6,34 @@ Los cambios notables de `/plano-real` se registran aquí. Versionado semántico:
 - **MINOR:** capacidad nueva o mejora de contrato compatible hacia atrás.
 - **PATCH:** correcciones compatibles de comportamiento, documentación o empaquetado.
 
+## 0.1.1
+
+El diagrama del plano deja de ser un dibujo y se vuelve un derivado de la tabla de pasos.
+
+### Impacto
+
+- Nuevo script `generar-diagrama.py`: lee la tabla de pasos del expediente y escribe el diagrama Mermaid dentro de la nota, además del entregable de una página en HTML con la marca, listo para imprimir.
+- El dibujo lleva la verdad a la vista: los pasos observados, medidos o firmados van en línea sólida, y los que solo se dijeron, en gris punteado. Los romanos de la excepción van como ruta aparte.
+- Contadores automáticos: pasos, puntos de decisión y esperas acumuladas, sumadas desde la propia tabla.
+- La auditoría del expediente gana un chequeo: si la tabla de pasos cambió y el diagrama no se regeneró, marca `diagrama_vencido` y el entregable no se puede cerrar.
+- Ejemplo completo en `examples/`, con expediente y entregable renderizado.
+
+### Compatibilidad
+
+- Compatible hacia atrás. El script de auditoría sigue funcionando igual y el chequeo nuevo solo aplica cuando la nota tiene el bloque de diagrama marcado.
+
+### Actualización
+
+- Volver a instalar el plugin o el marketplace según la ruta que uses. No hay nada que migrar.
+
+### Migración
+
+- Ninguna.
+
+### Entrega
+
+- Probado de punta a punta: generar, verificar que está al día, editar solo la tabla y comprobar que tanto `generar-diagrama.py --check` como la auditoría lo detectan, y regenerar.
+
 ## 0.1.0
 
 Primera versión pública del método, empaquetado como skill instalable.

@@ -1,6 +1,6 @@
 {
   "name": "plano-real",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Levanta, mide y rediseña la operación real de una empresa, con evidencia y sin inventar. Un método de diagnóstico en skills para Claude, Codex y Hermes.",
   "author": {
     "name": "Genaro Acosta",
