@@ -6,6 +6,36 @@ Los cambios notables de `/plano-real` se registran aquí. Versionado semántico:
 - **MINOR:** capacidad nueva o mejora de contrato compatible hacia atrás.
 - **PATCH:** correcciones compatibles de comportamiento, documentación o empaquetado.
 
+## 0.2.0
+
+El diagrama pasa a los simbolos de ISO 5807 y se dibuja en vertical, como se lee un flujograma.
+
+### Impacto
+
+- Simbolos correctos, no cajas genericas: terminador para inicio y fin, rectangulo para actividad, rombo para decision, documento con el borde ondulado para registros, paralelogramo para datos, cilindro para sistemas y forma de D para la demora.
+- El juego del cursograma OTIDA queda disponible con `--set cursograma`: circulo para operacion, cuadrado para inspeccion, flecha ancha para transporte.
+- La espera deja de ser una columna y se vuelve un simbolo: el generador inserta una demora entre dos pasos cada vez que la tabla declara espera, con el tiempo adentro. Diez esperas y 116 horas se ven de un golpe.
+- Acomodo vertical con carril de puestos a la izquierda y rutas de excepcion a la derecha. Cada cambio de dueno se ve en el carril.
+- El generador se autoinspecciona: si el acomodo produce formas encimadas, lo reporta y no entrega. Estado actual del ejemplo: cero traslapes.
+- Nueva referencia `references/06-simbolos-y-normas.md` con que exige ISO 9001, el juego completo de ISO 5807, el del cursograma y las reglas de flujo.
+
+### Compatibilidad
+
+- La tabla de pasos gana una columna opcional `forma`. Sin ella, el generador deduce la forma del tipo de paso y del juego de simbolos, asi que las tablas viejas siguen funcionando.
+- El bloque Mermaid de las notas anteriores cambia; volver a generar lo actualiza.
+
+### Actualizacion
+
+- Volver a instalar y regenerar el diagrama de las notas existentes.
+
+### Migracion
+
+- Ninguna sobre datos de cliente.
+
+### Entrega
+
+- Ejemplo regenerado en `examples/` con las formas declaradas, y verificacion de traslapes en cero.
+
 ## 0.1.1
 
 El diagrama del plano deja de ser un dibujo y se vuelve un derivado de la tabla de pasos.
