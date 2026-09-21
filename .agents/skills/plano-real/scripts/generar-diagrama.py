@@ -194,21 +194,43 @@ def grafo(meta, tablas):
 
 
 def medir(texto, forma, pie=""):
-    """Ancho y alto reales de la forma. Se mide con el texto completo que se va a dibujar:
-    el titulo ya numerado y el renglon chico de quien, sistema y espera. Medir con menos texto
-    es lo que hacia que el texto se saliera de su caja."""
-    alto, minimo, factor, chars = FORMAS.get(forma, FORMAS["actividad"])
+    """Mide la forma con todo el texto y reserva alto para cada renglón.
+
+    Antes solo se ajustaba el ancho. El alto se quedaba fijo, así que el tercer renglón
+    del título podía ocupar el mismo espacio que el renglón gris de metadatos.
+    """
+    alto_base, minimo, factor, chars = FORMAS.get(forma, FORMAS["actividad"])
     lineas = wrap(texto, chars)
     ancho = max(len(l) for l in lineas) * ANCHO_CHAR * factor + 44
     ancho = max(ancho, minimo)
     if pie:
         if forma == "decision":
             dy = 17.0
-            holgura = max(0.25, 1 - dy / (alto / 2))
+            holgura = max(0.25, 1 - dy / (alto_base / 2))
             ancho = max(ancho, (len(pie) * 5.6 + 14) / holgura)
         else:
             ancho = max(ancho, len(pie) * 5.6 + 40)
+    # Cada línea tiene su propia línea base. Se agrega espacio explícito entre título y meta.
+    if forma == "decision":
+        alto_necesario = len(lineas) * 15 + (19 if pie else 0) + 24
+    else:
+        alto_necesario = 22 + len(lineas) * 15 + (18 if pie else 0)
+    alto = max(alto_base, alto_necesario)
     return min(ancho, 460), alto, lineas
+
+
+def posiciones_texto(forma, y, alto, lineas, pie):
+    """Devuelve las líneas de título y meta sin coordenadas compartidas ni traslapes."""
+    if forma == "decision":
+        total = len(lineas) * 15 + (19 if pie else 0)
+        inicio = y + alto / 2 - total / 2 + 8
+        titulos = [inicio + 15 * k for k in range(len(lineas))]
+        meta = inicio + len(lineas) * 15 + 4 if pie else None
+        return titulos, meta
+    inicio = y + 22
+    titulos = [inicio + 15 * k for k in range(len(lineas))]
+    meta = inicio + len(lineas) * 15 + 3 if pie else None
+    return titulos, meta
 
 
 # ---------------------------------------------------------------- acomodo con motor
@@ -568,22 +590,22 @@ def dibujar_hoja(ac, pagina, nodos_por_id, juego, con_titulo, con_pie):
         partes.append(forma_svg(forma, x, y, w, h, solida))
         etiqueta = etiqueta_nodo(n, i)
         lineas = wrap(etiqueta, FORMAS.get(forma, FORMAS["actividad"])[3])
+        pie = renglon_chico(n)
+        ys_titulo, y_meta = posiciones_texto(forma, y, h, lineas, pie)
         if forma == "decision":
-            partes += ['<text x="%.1f" y="%.1f" class="nodo" text-anchor="middle">%s</text>' % (x + w / 2, y + h / 2 - 6 * (len(lineas) - 1) + 4, html.escape(l))
-                       for l in lineas]
+            partes += ['<text x="%.1f" y="%.1f" class="nodo" text-anchor="middle">%s</text>' % (x + w / 2, yy, html.escape(l))
+                       for l, yy in zip(lineas, ys_titulo)]
         elif forma == "conector":
             partes.append('<text x="%.1f" y="%.1f" class="nodo" text-anchor="middle">%s</text>' % (x + w / 2, y + h / 2 + 5, html.escape(lineas[0])))
         else:
-            partes += ['<text x="%.1f" y="%.1f" class="nodo">%s</text>' % (x + 16, y + 26 + 16 * k, html.escape(l)) for k, l in enumerate(lineas)]
-        pie = renglon_chico(n)
-        if pie and forma == "decision":
-            # el rombo se angosta hacia abajo: se calcula cuanto texto cabe a esa altura
-            dy = 17.0
-            disponible = 2 * (w / 2) * (1 - dy / (h / 2)) - 8
-            parte = pie[:max(8, int(disponible / 5.6))]
-            partes.append('<text x="%.1f" y="%.1f" class="mini" text-anchor="middle">%s</text>' % (x + w / 2, y + h / 2 + dy, html.escape(parte)))
-        elif pie:
-            partes.append('<text x="%.1f" y="%.1f" class="mini">%s</text>' % (x + 16, y + h - 12, html.escape(pie[:40])))
+            partes += ['<text x="%.1f" y="%.1f" class="nodo">%s</text>' % (x + 16, yy, html.escape(l))
+                       for l, yy in zip(lineas, ys_titulo)]
+        if pie and y_meta is not None:
+            if forma == "decision":
+                # El rombo se angosta hacia abajo; el ancho ya fue reservado por medir().
+                partes.append('<text x="%.1f" y="%.1f" class="mini" text-anchor="middle">%s</text>' % (x + w / 2, y_meta, html.escape(pie[:40])))
+            else:
+                partes.append('<text x="%.1f" y="%.1f" class="mini">%s</text>' % (x + 16, y_meta, html.escape(pie[:40])))
     partes.append("</svg>")
     return "\n".join(partes)
 
@@ -615,6 +637,51 @@ def cruces(ac):
                     elif abs(y1 - y2) < 0.6:
                         if fy + 2 < y1 < fy + fh - 2 and min(x1, x2) < fx + fw - 2 and fx + 2 < max(x1, x2):
                             fallas.append((r["desde"], r["hacia"], nid))
+    return fallas
+
+
+def problemas_texto(nodos, ac, juego):
+    """Detecta el síntoma que el chequeo anterior no veía: líneas de texto encimadas."""
+    fallas = []
+    for n in nodos:
+        i = n["id"]
+        if i not in ac["nodos"]:
+            continue
+        forma = resolver_forma(n["fila"], juego)
+        x, y, w, h = ac["nodos"][i]
+        lineas = wrap(etiqueta_nodo(n, i), FORMAS.get(forma, FORMAS["actividad"])[3])
+        pie = renglon_chico(n)
+        ys, y_meta = posiciones_texto(forma, y, h, lineas, pie)
+        for a, b in zip(ys, ys[1:]):
+            if b - a < 12:
+                fallas.append((i, "lineas del titulo", round(a), round(b)))
+        if y_meta is not None and ys and y_meta - ys[-1] < 10:
+            fallas.append((i, "titulo contra metadatos", round(ys[-1]), round(y_meta)))
+        for yy in ys + ([y_meta] if y_meta is not None else []):
+            if yy < y + 6 or yy > y + h - 4:
+                fallas.append((i, "texto cerca del borde", round(yy), round(y), round(h)))
+    return fallas
+
+
+def problemas_etiquetas(ac):
+    """Detecta etiquetas de rutas encimadas entre si o sobre una forma ajena."""
+    etiquetas = []
+    for r in ac["rutas"]:
+        if not r.get("etiqueta") or not r.get("etiqueta_pos"):
+            continue
+        x, y = r["etiqueta_pos"]
+        etiquetas.append((r, {"x": x - (len(r["etiqueta"]) * 6.2 + 12) / 2, "y": y - 12,
+                           "w": len(r["etiqueta"]) * 6.2 + 12, "h": 16}))
+    fallas = []
+    for idx, (r, a) in enumerate(etiquetas):
+        for nid, (x, y, w, h) in ac["nodos"].items():
+            if nid in (r["desde"], r["hacia"]):
+                continue
+            if a["x"] < x + w and x < a["x"] + a["w"] and a["y"] < y + h and y < a["y"] + a["h"]:
+                fallas.append((r["etiqueta"], "sobre nodo " + nid))
+        for r2, b in etiquetas[idx + 1:]:
+            if a["x"] < b["x"] + b["w"] and b["x"] < a["x"] + a["w"] and a["y"] < b["y"] + b["h"] and b["y"] < a["y"] + a["h"]:
+                fallas.append((r["etiqueta"], "sobre etiqueta " + r2["etiqueta"]))
     return fallas
 
 
@@ -768,6 +835,8 @@ def main():
               for p in paginas for i in p["ids"]]
     choques_totales = choques([b for b in bboxes])
     cruces_totales = cruces(ac)
+    texto_fallas = problemas_texto(nodos, ac, juego)
+    etiqueta_fallas = problemas_etiquetas(ac)
     der = mermaid(nodos, rutas, juego)
     if "--diagnostico" in args:
         cuenta, espera_total, n_demoras = resumen(nodos, juego)
@@ -784,13 +853,24 @@ def main():
         print("esperas: %d, total %s" % (n_demoras, bonito(espera_total)))
         print("traslapes:", choques_totales if choques_totales else "ninguno")
         print("rutas que atraviesan una forma:", sorted(set(cruces_totales)) if cruces_totales else "ninguna")
+        print("texto encimado o cerca del borde:", texto_fallas if texto_fallas else "ninguno")
+        print("etiquetas encimadas:", etiqueta_fallas if etiqueta_fallas else "ninguna")
         print("formas desconocidas:", desconocidas if desconocidas else "ninguna")
-        return 1 if (choques_totales or cruces_totales or desconocidas) else 0
+        return 1 if (choques_totales or cruces_totales or texto_fallas or etiqueta_fallas or desconocidas) else 0
     if desconocidas:
         print("generar-diagrama: formas que no existen en el juego %s: %s" % (juego, ", ".join(desconocidas)))
         return 1
     if choques_totales:
         print("generar-diagrama: el acomodo produce %d traslapes: %s" % (len(choques_totales), choques_totales[:3]))
+        return 1
+    if cruces_totales:
+        print("generar-diagrama: hay %d rutas que atraviesan una forma: %s" % (len(cruces_totales), sorted(set(cruces_totales))[:3]))
+        return 1
+    if texto_fallas:
+        print("generar-diagrama: hay texto encimado o cerca del borde: %s" % texto_fallas[:5])
+        return 1
+    if etiqueta_fallas:
+        print("generar-diagrama: hay etiquetas encimadas: %s" % etiqueta_fallas[:5])
         return 1
     if "--check" in args:
         actual = re.search(re.escape(INICIO) + r"(.*?)" + re.escape(FIN), texto, re.S)

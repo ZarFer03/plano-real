@@ -6,6 +6,27 @@ Los cambios notables de `/plano-real` se registran aquí. Versionado semántico:
 - **MINOR:** capacidad nueva o mejora de contrato compatible hacia atrás.
 - **PATCH:** correcciones compatibles de comportamiento, documentación o empaquetado.
 
+## 0.6.1
+
+Se corrige el amontonamiento interno del texto.
+
+### Causa raíz
+
+- Las líneas de un título dentro de un rombo se dibujaban con la misma coordenada `y`; por eso se montaban una sobre otra.
+- En las cajas rectangulares se medía el ancho, pero no el alto real de todos los renglones; el tercer renglón podía caer sobre el responsable, sistema o espera.
+
+### Corrección
+
+- El alto de cada forma se calcula con el número real de líneas del título y del renglón de metadatos.
+- Las líneas tienen posiciones verticales separadas y el renglón gris tiene un espacio mínimo de 10 unidades respecto al título.
+- El diagnóstico ahora detecta y rechaza: líneas con la misma altura, título contra metadatos, texto cerca del borde y etiquetas de rutas encimadas.
+- Se agregó `tests/test_generar_diagrama_layout.py` con tres regresiones: líneas separadas, decisiones con ramas reales y cero cruces/traslapes.
+
+### Verificación
+
+- Ejemplo: 17 nodos, 20 rutas, cero traslapes, cero cruces, cero texto encimado o cerca del borde, cero etiquetas encimadas.
+- `python3 -m unittest discover -s tests -v`: 3 pruebas OK.
+
 ## 0.6.0
 
 El acomodo lo hace un motor profesional, y el texto deja de salirse de sus formas.
