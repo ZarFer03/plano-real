@@ -17,6 +17,7 @@ El router de abajo elige la fase según lo que el usuario pida y lo que el exped
 | Rediseñar, borrar, simplificar, conectar, automatizar | 4 | `references/04-rediseno-y-prueba.md` |
 | Construir y probar contra la línea base | 4 | `references/04-rediseno-y-prueba.md` |
 | Sostener, adopción, custodia, comparar contra el punto de partida | 5 | `references/05-sostener.md` |
+| Generar el diagrama del plano y el entregable de una pagina | 2 y 3 | `scripts/generar-diagrama.py` |
 | Auditar el expediente antes de entregar | todas | `scripts/auditar-expediente.py` |
 ## Las cinco leyes, y son duras
 1. **Nada entra como hecho sin recibo.** Toda afirmación sobre la operación del cliente es de una de cuatro clases: `dicho` (alguien lo dijo, con quién y cuándo, sin verificar), `observado` (se caminó el caso completo, con quién), `medido` (se contó con método declarado y su fórmula), o `firmado` (el cliente revisó y aprobó). Nada más entra a un entregable.

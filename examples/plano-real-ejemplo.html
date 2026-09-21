@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es-MX"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plano real: Alta y cierre de una orden de servicio</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+:root{--accent:#2DD4BF;--text:#1A1A1A;--callout-bg:#F0FDF9;--callout-strong:#0F766E;--line:#1A1A1A;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;font-size:10pt;line-height:1.45;color:var(--text);background:#fff;width:216mm;min-height:279mm;margin:0 auto;padding:40pt 42pt;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+h1{font-family:'Montserrat',sans-serif;font-size:17pt;font-weight:700;letter-spacing:-0.2pt;}
+h2{font-family:'Montserrat',sans-serif;font-size:11pt;font-weight:600;margin:16pt 0 6pt;text-transform:uppercase;letter-spacing:0.6pt;}
+.sub{color:#4B5563;font-size:9pt;margin-top:3pt;}
+.rule{height:2pt;background:var(--accent);margin:10pt 0 14pt;}
+.hallazgo{background:var(--callout-bg);border-left:4pt solid var(--callout-strong);padding:9pt 11pt;margin:10pt 0 4pt;font-size:10.5pt;}
+.contadores{display:flex;gap:10pt;margin:12pt 0 4pt;}
+.card{flex:1;border:1.4pt solid var(--line);border-radius:6pt;padding:8pt 10pt;}
+.card b{font-family:'Montserrat',sans-serif;font-size:18pt;display:block;line-height:1.1;}
+.card span{font-size:8.5pt;color:#4B5563;}
+.diagrama{width:100%;height:auto;margin-top:6pt;}
+.nodo{font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;fill:#1A1A1A;}
+.mini{font-family:'Inter',sans-serif;font-size:10px;fill:#4B5563;}
+.espera{fill:#B45309;font-weight:600;}
+.exc{fill:#C2410C;font-weight:600;}
+table{width:100%;border-collapse:collapse;font-size:9pt;margin-top:4pt;}
+th,td{border:1pt solid var(--line);padding:4pt 6pt;text-align:left;vertical-align:top;}
+th{background:#F3F4F6;font-weight:600;}
+.pie{margin-top:14pt;border-top:1pt solid var(--line);padding-top:6pt;font-size:8pt;color:#4B5563;}
+@media print{body{width:100%;padding:32pt;} .no-print{display:none;}}
+@page{size:letter;margin:0;}
+</style></head><body>
+<h1>El plano real de la operación</h1>
+<div class="sub">Taller de flotillas (ejemplo inventado, sin datos de ninguna empresa) · Proceso: Alta y cierre de una orden de servicio · Fase: 2, plano real · Evidencia dominante: observado</div>
+<div class="rule"></div>
+<div class="hallazgo">El caso espera mas de un dia sin que nadie lo trabaje, y la espera no esta en el area que todos culpan.</div>
+<div class="contadores">
+<div class="card"><b>10</b><span>pasos</span></div>
+<div class="card"><b>2</b><span>puntos de decisión</span></div>
+<div class="card"><b>116.583 h</b><span>esperas acumuladas</span></div>
+<div class="card"><b>2</b><span>pasos sin observar</span></div>
+</div>
+<h2>Cómo camina el trabajo</h2>
+<svg viewBox="0 0 980 558" xmlns="http://www.w3.org/2000/svg" class="diagrama">
+<defs><marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1A1A1A"/></marker></defs>
+<rect x="30" y="70" width="200" height="56" rx="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="44" y="94" class="nodo">Recibe la solicitud de la</text>
+<text x="44" y="109" class="nodo">unidad</text>
+<text x="44" y="117" class="mini">WhatsApp</text>
+<text x="218" y="117" class="mini espera" text-anchor="end">espera 5 min</text>
+<rect x="30" y="134" width="200" height="34" rx="6" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="42" y="148" class="mini exc">por dato faltante</text>
+<text x="42" y="161" class="mini">ruta B: pide el dato al chofer</text>
+<path d="M130.0,126 L130.0,134" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<path d="M230,98.0 L264,98.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<rect x="270" y="70" width="200" height="56" rx="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="284" y="94" class="nodo">Captura en la hoja de</text>
+<text x="284" y="109" class="nodo">servicios</text>
+<text x="284" y="117" class="mini">Excel</text>
+<text x="458" y="117" class="mini espera" text-anchor="end">espera 4 h</text>
+<path d="M470,98.0 L504,98.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<polygon points="610.0,60 732,98.0 610.0,136 488,98.0" fill="#FFFDF5" stroke="#1A1A1A" stroke-width="2"/>
+<text x="610.0" y="96.0" class="nodo" text-anchor="middle">Valida el presupuesto autorizado</text>
+<text x="610.0" y="112.0" class="mini" text-anchor="middle">decide</text>
+<text x="524" y="117" class="mini">Excel</text>
+<text x="698" y="117" class="mini espera" text-anchor="end">espera 1 d</text>
+<rect x="510" y="134" width="200" height="34" rx="6" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="522" y="148" class="mini exc">por autorizacion</text>
+<text x="522" y="161" class="mini">ruta D: sube a direccion</text>
+<path d="M610.0,126 L610.0,134" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<path d="M710,98.0 L744,98.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<polygon points="850.0,60 972,98.0 850.0,136 728,98.0" fill="#FFFDF5" stroke="#1A1A1A" stroke-width="2"/>
+<text x="850.0" y="96.0" class="nodo" text-anchor="middle">Asigna unidad y mecanico</text>
+<text x="850.0" y="112.0" class="mini" text-anchor="middle">decide</text>
+<text x="764" y="117" class="mini">pizarron</text>
+<text x="938" y="117" class="mini espera" text-anchor="end">espera 3 h</text>
+<rect x="750" y="134" width="200" height="34" rx="6" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="762" y="148" class="mini exc">por capacidad</text>
+<text x="762" y="161" class="mini">ruta E: espera unidad libre</text>
+<path d="M850.0,126 L850.0,134" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<path d="M850.0,126 L850.0,182 L10,182 L10,244.0 L24,244.0" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-dasharray="8 5" marker-end="url(#flecha)"/>
+<rect x="30" y="216" width="200" height="56" rx="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="44" y="240" class="nodo">Levanta el diagnostico en</text>
+<text x="44" y="255" class="nodo">piso</text>
+<text x="44" y="263" class="mini">papel</text>
+<text x="218" y="263" class="mini espera" text-anchor="end">espera 2 h</text>
+<path d="M230,244.0 L264,244.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<rect x="270" y="216" width="200" height="56" rx="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="284" y="240" class="nodo">Cotiza refacciones</text>
+<text x="284" y="263" class="mini">correo</text>
+<text x="458" y="263" class="mini espera" text-anchor="end">espera 6 h</text>
+<rect x="270" y="280" width="200" height="34" rx="6" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="282" y="294" class="mini exc">por monto</text>
+<text x="282" y="307" class="mini">ruta C: arriba de 8 mil sube a dir</text>
+<path d="M370.0,272 L370.0,280" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<path d="M470,244.0 L504,244.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<rect x="510" y="216" width="200" height="56" rx="8" fill="#F3F4F6" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="524" y="240" class="nodo">Solicita refacciones al</text>
+<text x="524" y="255" class="nodo">proveedor</text>
+<text x="524" y="263" class="mini">proveedor</text>
+<text x="698" y="263" class="mini espera" text-anchor="end">espera 2 d</text>
+<path d="M710,244.0 L744,244.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<rect x="750" y="216" width="200" height="56" rx="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="764" y="240" class="nodo">Ejecuta la reparacion</text>
+<text x="764" y="263" class="mini">taller</text>
+<text x="938" y="263" class="mini espera" text-anchor="end">espera 1 d</text>
+<rect x="750" y="280" width="200" height="34" rx="6" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="762" y="294" class="mini exc">por sistema</text>
+<text x="762" y="307" class="mini">ruta F: no hay refaccion alternati</text>
+<path d="M850.0,272 L850.0,280" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<path d="M850.0,272 L850.0,328 L10,328 L10,390.0 L24,390.0" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-dasharray="8 5" marker-end="url(#flecha)"/>
+<rect x="30" y="362" width="200" height="56" rx="8" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="44" y="386" class="nodo">Avisa al cliente</text>
+<text x="44" y="409" class="mini">WhatsApp</text>
+<text x="218" y="409" class="mini espera" text-anchor="end">espera 30 min</text>
+<path d="M230,390.0 L264,390.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<rect x="270" y="362" width="200" height="56" rx="8" fill="#F3F4F6" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="284" y="386" class="nodo">Cierra y factura</text>
+<text x="284" y="409" class="mini">sistema contable</text>
+<text x="458" y="409" class="mini espera" text-anchor="end">espera 5 h</text>
+<rect x="270" y="426" width="200" height="34" rx="6" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="282" y="440" class="mini exc">por dato faltante</text>
+<text x="282" y="453" class="mini">ruta B: pide el dato al chofer</text>
+<path d="M370.0,418 L370.0,426" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<rect x="600" y="14" width="16" height="12" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/><text x="624" y="25" class="mini">observado, medido o firmado</text><rect x="600" y="34" width="16" height="12" fill="#F3F4F6" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="6 4"/><text x="624" y="45" class="mini">dicho o sin observar: no se toca</text><rect x="600" y="54" width="16" height="12" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/><text x="624" y="65" class="mini">ruta de excepcion</text>
+</svg>
+<h2>Rutas de excepción</h2>
+<table><tr><th>Paso</th><th>Excepción</th><th>Ruta</th><th>Evidencia</th></tr><tr><td>Recibe la solicitud de la unidad</td><td>por dato faltante</td><td>ruta B: pide el dato al chofer</td><td>[observado] caso A caminado con el jefe de patio, el 2026-09</td></tr>
+<tr><td>Valida el presupuesto autorizado</td><td>por autorizacion</td><td>ruta D: sube a direccion</td><td>[observado] caso A caminado con el jefe de patio, el 2026-09</td></tr>
+<tr><td>Asigna unidad y mecanico</td><td>por capacidad</td><td>ruta E: espera unidad libre</td><td>[observado] caso A caminado con el jefe de patio, el 2026-09</td></tr>
+<tr><td>Cotiza refacciones</td><td>por monto</td><td>ruta C: arriba de 8 mil sube a direccion</td><td>[medido] 12 casos en la ventana de 3 dias, promedio 6 h de e</td></tr>
+<tr><td>Ejecuta la reparacion</td><td>por sistema</td><td>ruta F: no hay refaccion alternativa</td><td>[observado] caso B caminado con el mecanico, el 2026-09-19</td></tr>
+<tr><td>Cierra y factura</td><td>por dato faltante</td><td>ruta B: pide el dato al chofer</td><td>sin observar</td></tr></table>
+<div class="pie">Generado desde la tabla de pasos del expediente. El diagrama no se edita a mano: si la tabla cambia, se vuelve a generar. Los pasos en gris punteado están sin observar y no sostienen un rediseño todavía.</div>
+</body></html>

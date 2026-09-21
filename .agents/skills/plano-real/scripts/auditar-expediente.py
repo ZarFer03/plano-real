@@ -2,7 +2,7 @@
 """Compuerta de archivo del expediente de operaciones.
 Uso: python3 auditar-expediente.py <ruta del expediente> [--fase N]
 Sale con codigo 1 si hay fallas. Solo libreria estandar."""
-import pathlib, re, sys, collections
+import pathlib, re, subprocess, sys, collections
 
 REQUERIDOS = {
     0: ["00_AGENT_BRIEF.md", "01_alcance.md"],
@@ -83,7 +83,15 @@ def main():
         for m in re.finditer(r"\[FALTA DATO[^\]]*\]", t):
             avisos["falta_dato"].append(f"{rel}: {m.group(0)[:90]}")
 
-    # 6) brief desactualizado
+    # 6) el diagrama del plano no coincide con la tabla de pasos
+    gen = pathlib.Path(__file__).parent / "generar-diagrama.py"
+    plano = raiz / "04_plano-real.md"
+    if gen.exists() and plano.exists() and "<!-- diagrama:inicio -->" in plano.read_text(encoding="utf-8"):
+        r = subprocess.run([sys.executable, str(gen), str(plano), "--check"], capture_output=True, text=True)
+        if r.returncode != 0:
+            fallas["diagrama_vencido"].append("04_plano-real.md: el diagrama quedo viejo, hay que regenerarlo desde la tabla")
+
+    # 7) brief desactualizado
     brief = raiz / "00_AGENT_BRIEF.md"
     if brief.exists():
         mas_nuevo = max((p.stat().st_mtime for p in notas if p.name != "00_AGENT_BRIEF.md"), default=0)

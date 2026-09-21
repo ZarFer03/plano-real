@@ -59,6 +59,7 @@ El sistema elige la fase según lo que pidas y lo que el expediente ya tenga. Ca
 | Rediseñar: borrar, simplificar, conectar, automatizar | 4 | `04-rediseno-y-prueba.md` |
 | Probar contra la línea base | 4 | `04-rediseno-y-prueba.md` |
 | Sostener, adopción y comparación | 5 | `05-sostener.md` |
+| Generar el diagrama del plano y el entregable de una página | 2 y 3 | `scripts/generar-diagrama.py` |
 | Auditar el expediente antes de entregar | todas | `scripts/auditar-expediente.py` |
 
 ## Las cinco leyes
@@ -88,6 +89,14 @@ Un expediente por cliente, y esta es su forma:
 09_custodia.md      adopción, comparación y siguiente ciclo
 fuentes/            los registros crudos que dio el cliente
 ```
+
+## El diagrama, y por qué es derivado
+
+El plano se captura **una sola vez** en la tabla de pasos. De ahí salen dos cosas: el diagrama Mermaid que vive dentro de la nota, y el entregable de una página en PDF, con la marca.
+
+El dibujo nunca se edita a mano. Si la tabla cambia y el diagrama no, la auditoría lo marca como vencido y el entregable no se puede cerrar. Así el dibujo no puede mentir.
+
+Y trae la verdad a la vista: **los pasos observados se dibujan en línea sólida y los que solo se dijeron, en gris punteado.** De un vistazo se ve qué parte del proceso está verificada y qué parte todavía es de oídas. Un ejemplo completo está en [`examples/`](examples/).
 
 ## Qué no hace
 
