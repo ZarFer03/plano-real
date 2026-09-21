@@ -1,0 +1,32 @@
+{
+  "name": "plano-real",
+  "description": "El marketplace oficial de la colección /plano-real.",
+  "owner": {
+    "name": "Genaro Acosta"
+  },
+  "plugins": [
+    {
+      "name": "plano-real",
+      "displayName": "/plano-real",
+      "source": "./",
+      "description": "Levanta, mide y rediseña la operación real de una empresa, con evidencia y sin inventar. Un método de diagnóstico en skills para Claude, Codex y Hermes.",
+      "author": {
+        "name": "Genaro Acosta"
+      },
+      "homepage": "https://github.com/ZarFer03/plano-real#readme",
+      "repository": "https://github.com/ZarFer03/plano-real",
+      "license": "MIT",
+      "keywords": [
+        "operaciones",
+        "procesos",
+        "diagnostico",
+        "consultoria"
+      ],
+      "tags": [
+        "operaciones",
+        "procesos",
+        "productividad"
+      ]
+    }
+  ]
+}

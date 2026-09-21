@@ -1,0 +1,29 @@
+{
+  "name": "plano-real",
+  "version": "0.1.0",
+  "description": "Levanta, mide y rediseña la operación real de una empresa, con evidencia y sin inventar. Un método de diagnóstico en skills para Claude, Codex y Hermes.",
+  "author": {
+    "name": "Genaro Acosta",
+    "url": "https://github.com/ZarFer03"
+  },
+  "homepage": "https://github.com/ZarFer03/plano-real#readme",
+  "repository": "https://github.com/ZarFer03/plano-real",
+  "license": "MIT",
+  "keywords": [
+    "operaciones",
+    "procesos",
+    "diagnostico",
+    "consultoria",
+    "excepciones"
+  ],
+  "skills": "./.agents/skills/",
+  "interface": {
+    "displayName": "/plano-real",
+    "shortDescription": "Un método de diagnóstico de operaciones, con evidencia y sin inventar.",
+    "longDescription": "Levanta, mide y rediseña la operación real de una empresa, con evidencia y sin inventar. Un método de diagnóstico en skills para Claude, Codex y Hermes.",
+    "developerName": "Genaro Acosta",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "Ayudame a levantar el plano real de la operacion de mi empresa."
+  }
+}

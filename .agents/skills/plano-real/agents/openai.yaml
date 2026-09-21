@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plano Real"
+policy:
+  allow_implicit_invocation: true

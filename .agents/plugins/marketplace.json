@@ -1,0 +1,20 @@
+{
+  "name": "plano-real",
+  "interface": {
+    "displayName": "El marketplace oficial de la coleccion /plano-real."
+  },
+  "plugins": [
+    {
+      "name": "plano-real",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
