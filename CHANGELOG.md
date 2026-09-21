@@ -6,6 +6,37 @@ Los cambios notables de `/plano-real` se registran aquí. Versionado semántico:
 - **MINOR:** capacidad nueva o mejora de contrato compatible hacia atrás.
 - **PATCH:** correcciones compatibles de comportamiento, documentación o empaquetado.
 
+## 0.5.0
+
+El diagrama deja de ser una columna. Ahora es un grafo con ramas de verdad.
+
+### Impacto
+
+- **El modelo cambia: dos tablas, no una lista.** `Nodos` (id, texto, forma, quién, sistema, trabajo, espera, evidencia) y `Rutas` (desde, hacia, etiqueta, tipo). Una lista no puede representar un grafo: por eso el dibujo salía lineal aunque el proceso tuviera caminos alternos. Esta era la causa de raíz, no el estilo.
+- **Acomodo por capas.** El generador calcula el rango de cada nodo por camino más largo, ordena los nodos de cada capa, y dibuja el grafo: los caminos se separan en el rombo y se vuelven a juntar donde corresponde.
+- **Cuatro clases de ruta con trazo propio.** `normal` sólida, `excepcion` punteada naranja, `retrabajo` punteada azul por el carril exterior, `rechazo` punteada roja corta y terminal.
+- **Los retrabajos salen por el carril exterior** y entran al paso destino por arriba, para no cruzar ninguna forma.
+- **Un rombo sin dos salidas ya no pasa.** El diagnóstico cuenta las decisiones y avisa cuántas tienen dos o más salidas.
+- **Rutas que cruzan de hoja** se unen con el símbolo de conector, con la letra de la hoja destino.
+- El ejemplo cambia: ahora es el control de la documentación, con una decisión de tres salidas, tres retrabajos, una ruta de excepción y un cierre terminal por rechazo.
+
+### Compatibilidad
+
+- La tabla vieja de pasos sigue funcionando: el generador la convierte en nodos y rutas, con la cadena como camino principal y cada excepción como nodo con su ida y su regreso.
+- El bloque Mermaid de las notas anteriores cambia; volver a generar lo actualiza.
+
+### Actualizacion
+
+- Volver a instalar y regenerar.
+
+### Migracion
+
+- Ninguna obligatoria. Para aprovechar las ramas, migrar la tabla de pasos a las tablas de nodos y rutas.
+
+### Entrega
+
+- Verificación con el ejemplo: 17 nodos, 20 rutas, 4 decisiones y las 4 con dos o más salidas, 3 retrabajos, 0 formas encimadas, 0 rutas que atraviesan una forma.
+
 ## 0.4.0
 
 Ramas con condicion, retrabajo visible y la ficha del proceso que pide ISO 9001.

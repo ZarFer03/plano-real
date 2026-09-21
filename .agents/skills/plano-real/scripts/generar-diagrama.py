@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
-"""Genera el diagrama del plano real desde la tabla de pasos.
-Simbolos ISO 5807 por defecto, o del cursograma OTIDA con --set cursograma.
-El dibujo es derivado: nunca se edita a mano. La tabla manda.
-Pagina el diagrama solo, con conectores, para que cada hoja se lea sin amontonarse.
+"""Genera el diagrama del plano real desde el expediente.
+La fuente son dos tablas: Nodos y Rutas. El dibujo es un grafo por capas: un nodo de
+decision puede abrir dos o tres caminos, los caminos se separan y se vuelven a juntar,
+y los retrabajos regresan por un carril exterior. Nunca se edita a mano.
+
+Si la nota todavia trae la tabla vieja de pasos, se sintetiza un grafo lineal con sus
+rutas de excepcion, para no romper expedientes anteriores.
 
 Uso:
   python3 generar-diagrama.py 04_plano-real.md                      escribe el bloque Mermaid en la nota
   python3 generar-diagrama.py 04_plano-real.md --html salida.html   emite ademas el entregable
   python3 generar-diagrama.py 04_plano-real.md --check              sale 1 si el diagrama de la nota quedo viejo
-  python3 generar-diagrama.py 04_plano-real.md --diagnostico        reporta traslapes, huecos y resumen
-  --set iso5807 | cursograma        juego de simbolos
-  --por-pagina N                    elementos por hoja (por defecto 7)
+  python3 generar-diagrama.py 04_plano-real.md --diagnostico        reporta cruces, traslapes y resumen
+  --set iso5807 | cursograma      juego de simbolos
+  --por-hoja N                    altura maxima de cada hoja
 """
 import html
 import pathlib
@@ -21,55 +24,87 @@ INICIO, FIN = "<!-- diagrama:inicio -->", "<!-- diagrama:fin -->"
 SOLIDA = {"observado", "medido", "firmado"}
 LETRAS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-# forma: (alto, caracteres por linea, aire extra abajo)
+# forma: (alto base, ancho minimo, factor de ancho sobre el texto, caracteres por linea)
 FORMAS = {
-    "inicio": (46, 30, 0), "fin": (46, 30, 0),
-    "actividad": (64, 38, 0), "documento": (72, 38, 0), "datos": (64, 36, 0),
-    "entrada-manual": (68, 34, 0), "demora": (46, 20, 0), "base-de-datos": (74, 34, 0),
-    "almacenamiento": (64, 32, 0), "preparacion": (64, 34, 0), "subproceso": (64, 36, 0),
-    "conector": (56, 4, 0), "decision": (104, 24, 22), "operacion": (92, 20, 0),
-    "inspeccion": (92, 20, 0), "transporte": (64, 30, 0),
+    "inicio": (46, 170, 1.0, 30), "fin": (46, 170, 1.0, 30),
+    "actividad": (56, 190, 1.0, 30), "documento": (64, 190, 1.0, 30),
+    "datos": (56, 190, 1.0, 28), "entrada-manual": (56, 190, 1.0, 26),
+    "base-de-datos": (70, 190, 1.0, 28), "almacenamiento": (56, 190, 1.0, 26),
+    "preparacion": (56, 200, 1.0, 26), "subproceso": (56, 190, 1.0, 28),
+    "conector": (50, 50, 1.0, 4), "demora": (46, 150, 1.0, 18),
+    "decision": (104, 240, 1.75, 22), "operacion": (92, 150, 1.0, 18),
+    "inspeccion": (92, 150, 1.0, 18), "transporte": (56, 190, 1.0, 26),
 }
-ANCHO_NODO, ANCHO_DEC, ANCHO_ESPERA = 340, 250, 150
-X_CARRIL, X_MAIN, X_EXC = 180.0, 350.0, 770.0
-ANCHO_EXC, ANCHO_LIENZO = 200.0, 1000.0
-HUECO, HUECO_ESPERA = 26, 22
+ANCHO_CHAR = 7.7
+SEP_Y, SEP_X = 78, 46
+CANAL_X, MARGEN_X, MARGEN_Y = 26, 60, 40
 
 
-def leer_tabla(texto):
-    encabezado, filas = None, []
+def leer_secciones(texto):
+    meta, tablas = {}, {}
+    for etiqueta, clave in (("Cliente:", "cliente"), ("Proceso:", "proceso"), ("Fase:", "fase"), ("Hallazgo:", "hallazgo"),
+                            ("Entradas:", "entradas"), ("Salidas:", "salidas"), ("Secuencia:", "secuencia"),
+                            ("Criterios:", "criterios"), ("Recursos:", "recursos"), ("Responsables:", "responsables"),
+                            ("Riesgos:", "riesgos"), ("Mejora:", "mejora")):
+        m = re.search(re.escape(etiqueta) + r"\s*(.+)", texto)
+        if m:
+            meta[clave] = m.group(1).strip()
+    encabezado, filas, destino = None, [], None
     for linea in texto.split("\n"):
         l = linea.strip()
         if not l.startswith("|"):
+            if encabezado:
+                tablas[destino] = tablas.get(destino, []) + filas
+            encabezado, filas, destino = None, [], None
             continue
         celdas = [c.strip() for c in l.strip("|").split("|")]
-        if not celdas or set("".join(celdas)) <= set("-: "):
+        if set("".join(celdas)) <= set("-: "):
             continue
         if encabezado is None:
             encabezado = [c.lower() for c in celdas]
+            if "hacia" in encabezado and "desde" in encabezado:
+                destino = "rutas"
+            elif "hacia" in encabezado:
+                destino = "rutas"
+            elif "forma" in encabezado or "texto" in encabezado:
+                destino = "nodos"
+            else:
+                destino = "pasos"
             continue
-        fila = {k: "" for k in encabezado}
-        for i, c in enumerate(celdas):
-            if i < len(encabezado):
-                fila[encabezado[i]] = c
-        if fila.get("paso"):
-            filas.append(fila)
-    return filas
+        filas.append({k: "" for k in encabezado} | {encabezado[i]: c for i, c in enumerate(celdas) if i < len(encabezado)})
+    if encabezado:
+        tablas[destino] = tablas.get(destino, []) + filas
+    return meta, tablas
 
 
-def clase_evidencia(celda):
-    c = (celda or "").lower()
+def minutos(t):
+    m = re.match(r"([\d.]+)\s*(min|h|horas?|d|dias?|días?)", (t or "").strip(), re.I)
+    if not m:
+        return 0.0
+    v = float(m.group(1))
+    u = m.group(2).lower()
+    return v * 60 if u.startswith("h") else (v if u.startswith("min") else v * 1440)
+
+
+def bonito(m):
+    if m >= 1440 and m % 1440 == 0:
+        return "%g d" % (m / 1440)
+    return ("%g h" % (m / 60)) if m >= 60 else ("%g min" % m)
+
+
+def clase_evidencia(c):
+    c = (c or "").lower()
     for k in ("observado", "medido", "firmado"):
         if k in c:
             return k
     return "dicho" if "dicho" in c else "sin observar"
 
 
-def resolver_forma(p, juego):
-    f = (p.get("forma") or "").strip().lower()
+def resolver_forma(fila, juego):
+    f = (fila.get("forma") or "").strip().lower()
     if f in FORMAS:
         return f
-    if (p.get("tipo") or "").lower().startswith("decid"):
+    if (fila.get("tipo") or "").lower().startswith("decid"):
         return "decision"
     return "operacion" if juego == "cursograma" else "actividad"
 
@@ -87,18 +122,193 @@ def wrap(t, n):
     return lineas or [""]
 
 
-def minutos(t):
-    m = re.match(r"([\d.]+)\s*(min|h|horas?|d|dias?|días?)", (t or "").strip(), re.I)
-    if not m:
-        return 0.0
-    v, u = float(m.group(1)), m.group(2).lower()
-    return v * 60 if u.startswith("h") else (v if u.startswith("min") else v * 1440)
+def grafo(meta, tablas):
+    """Devuelve nodos y rutas. Si la nota trae la tabla vieja de pasos, sintetiza el grafo."""
+    nodos, rutas = [], []
+    if tablas.get("nodos"):
+        for fila in tablas["nodos"]:
+            nid = (fila.get("id") or fila.get("nodo") or "").strip()
+            if not nid:
+                continue
+            nodos.append({"id": nid, "texto": (fila.get("texto") or fila.get("paso") or "").strip(), "fila": fila,
+                          "quien": (fila.get("quien") or "").strip(), "sistema": (fila.get("sistema") or "").strip(),
+                          "trabajo": (fila.get("trabajo") or "").strip(), "espera": (fila.get("espera") or "").strip(),
+                          "evidencia": (fila.get("evidencia") or "").strip()})
+        for fila in tablas.get("rutas", []):
+            d, h = (fila.get("desde") or "").strip(), (fila.get("hacia") or "").strip()
+            if d and h:
+                rutas.append({"desde": d, "hacia": h, "etiqueta": (fila.get("etiqueta") or fila.get("condicion") or "").strip(),
+                              "tipo": (fila.get("tipo") or "normal").strip().lower()})
+        return nodos, rutas
+    pasos = tablas.get("pasos") or []
+    nodos.append({"id": "n0", "texto": "Inicio del caso", "fila": {"forma": "inicio", "quien": ""}, "quien": "", "sistema": "", "trabajo": "", "espera": "", "evidencia": ""})
+    for i, p in enumerate(pasos, 1):
+        nodos.append({"id": "n%d" % i, "texto": p.get("paso", ""), "fila": p, "quien": p.get("quien", ""), "sistema": p.get("sistema", ""),
+                      "trabajo": p.get("trabajo", ""), "espera": p.get("espera", ""), "evidencia": p.get("evidencia", "")})
+        rutas.append({"desde": "n%d" % (i - 1), "hacia": "n%d" % i, "etiqueta": "", "tipo": "normal"})
+        exc = (p.get("excepcion") or "").strip()
+        if exc and exc.lower() != "ninguna":
+            eid = "e%d" % i
+            nodos.append({"id": eid, "texto": exc, "fila": {"forma": "actividad", "quien": p.get("quien", "")}, "quien": p.get("quien", ""),
+                          "sistema": "", "trabajo": "", "espera": "", "evidencia": p.get("evidencia", "")})
+            rutas.append({"desde": "n%d" % i, "hacia": eid, "etiqueta": (p.get("condicion") or "").strip() or "excepcion", "tipo": "excepcion"})
+            regreso = (p.get("regreso") or "").strip()
+            destino = ("n%s" % regreso) if regreso.isdigit() else "n%d" % (i + 1)
+            rutas.append({"desde": eid, "hacia": destino, "etiqueta": ("vuelve al paso %s" % regreso) if regreso.isdigit() else "continua", "tipo": "retrabajo"})
+    nodos.append({"id": "nf", "texto": "Fin del caso", "fila": {"forma": "fin", "quien": ""}, "quien": "", "sistema": "", "trabajo": "", "espera": "", "evidencia": ""})
+    rutas.append({"desde": "n%d" % len(pasos), "hacia": "nf", "etiqueta": "", "tipo": "normal"})
+    return nodos, rutas
 
 
-def bonito(m):
-    if m >= 1440 and m % 1440 == 0:
-        return "%g d" % (m / 1440)
-    return ("%g h" % (m / 60)) if m >= 60 else ("%g min" % m)
+def medir(texto, forma):
+    alto, minimo, factor, chars = FORMAS.get(forma, FORMAS["actividad"])
+    lineas = wrap(texto, chars)
+    ancho = max(len(l) for l in lineas) * ANCHO_CHAR * factor + 44
+    ancho = max(ancho, minimo * factor)
+    return min(ancho, 360 * factor), alto, lineas
+
+
+def capas(nodos, rutas):
+    """Rango por camino mas largo; las aristas que cierran ciclo se marcan como retorno."""
+    ids = [n["id"] for n in nodos]
+    salidas = {i: [] for i in ids}
+    entradas = {i: [] for i in ids}
+    for r in rutas:
+        if r["desde"] in salidas and r["hacia"] in entradas:
+            salidas[r["desde"]].append(r)
+            entradas[r["hacia"]].append(r)
+    inicio = next((n["id"] for n in nodos if (n["fila"].get("forma") or "").strip().lower() == "inicio"), None)
+    if inicio is None:
+        inicio = next((i for i in ids if not entradas[i]), ids[0] if ids else None)
+    color, retorno = {}, set()
+    pila = []
+
+    def dfs(u):
+        color[u] = 1
+        pila.append(u)
+        for r in salidas[u]:
+            v = r["hacia"]
+            if color.get(v) == 1:
+                retorno.add((r["desde"], r["hacia"], r["etiqueta"]))
+            elif v not in color:
+                dfs(v)
+        pila.pop()
+        color[u] = 2
+
+    if inicio:
+        dfs(inicio)
+    for i in ids:
+        if i not in color:
+            dfs(i)
+    rango = {i: 0 for i in ids}
+    for _ in range(len(ids) + 1):
+        cambio = False
+        for r in rutas:
+            if (r["desde"], r["hacia"], r["etiqueta"]) in retorno:
+                continue
+            if r["desde"] in rango and r["hacia"] in rango:
+                if rango[r["hacia"]] < rango[r["desde"]] + 1:
+                    rango[r["hacia"]] = rango[r["desde"]] + 1
+                    cambio = True
+        if not cambio:
+            break
+    por_rango = {}
+    orden = {n["id"]: k for k, n in enumerate(nodos)}
+    for i in ids:
+        por_rango.setdefault(rango[i], []).append(i)
+    for k in por_rango:
+        por_rango[k].sort(key=lambda i: orden[i])
+    return rango, por_rango, salidas, entradas, retorno, inicio
+
+
+def ordenar_filas(por_rango, salidas, entradas, vueltas=6):
+    pos = {}
+    for k, fila in por_rango.items():
+        for j, i in enumerate(fila):
+            pos[i] = (k, j)
+
+    def mediana(vecinos):
+        v = sorted(pos[j][1] for j in vecinos if j in pos and pos[j][0] != pos.get(i, (0, 0))[0])
+        return v[len(v) // 2] if v else pos[i][1]
+
+    for n in range(vueltas):
+        orden_k = sorted(por_rango)
+        for k in (orden_k if n % 2 == 0 else list(reversed(orden_k))):
+            for i in por_rango[k]:
+                vecinos = [r["hacia"] for r in salidas[i]] + [r["desde"] for r in entradas[i]]
+                pos[i] = (k, mediana(vecinos))
+            por_rango[k].sort(key=lambda i: pos[i][1])
+            for j, i in enumerate(por_rango[k]):
+                pos[i] = (k, j)
+    return por_rango
+
+
+def acomodar(nodos, rutas, juego):
+    rango, por_rango, salidas, entradas, retorno, inicio = capas(nodos, rutas)
+    por_rango = ordenar_filas(por_rango, salidas, entradas)
+    figura = {}
+    for n in nodos:
+        forma = resolver_forma(n["fila"], juego)
+        ancho, alto, lineas = medir(n["texto"], forma)
+        figura[n["id"]] = {"n": n, "forma": forma, "ancho": ancho, "alto": alto, "lineas": lineas}
+    alto_fila = {k: max(figura[i]["alto"] for i in fila) for k, fila in por_rango.items()}
+    y = MARGEN_Y
+    for k in sorted(por_rango):
+        for i in por_rango[k]:
+            figura[i]["y"] = y + (alto_fila[k] - figura[i]["alto"]) / 2
+        y += alto_fila[k] + SEP_Y
+    ancho_por_fila = {}
+    for k, fila in por_rango.items():
+        total = sum(figura[i]["ancho"] for i in fila) + SEP_X * (len(fila) - 1)
+        ancho_por_fila[k] = total
+    ancho = max(ancho_por_fila.values()) if ancho_por_fila else 600
+    centro = MARGEN_X + ancho / 2
+    for k, fila in por_rango.items():
+        x = centro - ancho_por_fila[k] / 2
+        for i in fila:
+            figura[i]["x"] = x
+            x += figura[i]["ancho"] + SEP_X
+    retornos = sorted({(r["desde"], r["hacia"]) for r in rutas if (r["desde"], r["hacia"], r["etiqueta"]) in retorno},
+                      key=lambda p: (rango.get(p[1], 0), rango.get(p[0], 0)))
+    carril = {}
+    base = MARGEN_X + ancho + CANAL_X
+    for k, (d, h) in enumerate(retornos):
+        carril[(d, h)] = base + k * 34
+    derecha = base + max(0, len(retornos) - 1) * 34
+    for r in rutas:
+        if (r["desde"], r["hacia"]) in carril and r.get("etiqueta"):
+            derecha = max(derecha, carril[(r["desde"], r["hacia"])] + 10 + len(r["etiqueta"]) * 6.1 + 30)
+    ancho_total = max(base + max(1, len(retornos)) * 34 + MARGEN_X, derecha + 20)
+    return figura, rango, por_rango, salidas, entradas, retorno, carril, ancho_total, y
+
+
+def puntos_arista(figura, r, rango, retorno, carril):
+    """Devuelve los puntos de la ruta y el punto donde va la etiqueta."""
+    s, t = figura[r["desde"]], figura[r["hacia"]]
+    if r.get("sintetica"):
+        mx, my = s["x"] + s["ancho"] / 2, s["y"] + s["alto"]
+        tx, ty = t["x"] + t["ancho"] / 2, t["y"]
+        if abs(mx - tx) < 2:
+            return [(mx, my), (tx, ty)], (mx + 8, (my + ty) / 2), False
+        medio = my + (ty - my) / 2
+        return [(mx, my), (mx, medio), (tx, medio), (tx, ty)], ((mx + tx) / 2, medio - 7), False
+    retorno_arista = (r["desde"], r["hacia"], r["etiqueta"]) in retorno or rango[r["hacia"]] <= rango[r["desde"]]
+    mx, my = s["x"] + s["ancho"] / 2, s["y"] + s["alto"]
+    if retorno_arista:
+        canal = carril.get((r["desde"], r["hacia"]))
+        if canal is None:
+            canal = max(carril.values()) if carril else MARGEN_X + 600
+        salida_y = s["y"] + s["alto"] + SEP_Y * 0.34
+        llegada_y = max(16.0, t["y"] - SEP_Y * 0.34)
+        pts = [(mx, s["y"] + s["alto"]), (mx, salida_y), (canal, salida_y), (canal, llegada_y),
+               (t["x"] + t["ancho"] / 2 + 16, llegada_y), (t["x"] + t["ancho"] / 2 + 16, t["y"])]
+        return pts, (canal + 10, (salida_y + llegada_y) / 2 + 4), True
+    tx, ty = t["x"] + t["ancho"] / 2, t["y"]
+    if abs(mx - tx) < 2:
+        return [(mx, my), (tx, ty)], (mx + 8, (my + ty) / 2), False
+    medio = my + (ty - my) / 2
+    pts = [(mx, my), (mx, medio), (tx, medio), (tx, ty)]
+    return pts, ((mx + tx) / 2, medio - 7), False
 
 
 def forma_svg(f, x, y, w, h, solida):
@@ -110,216 +320,81 @@ def forma_svg(f, x, y, w, h, solida):
     if f in ("inicio", "fin"):
         return '<rect x="%s" y="%s" width="%s" height="%s" rx="%s" %s/>' % (x, y, w, h, h / 2, a)
     if f in ("actividad", "subproceso"):
-        s = '<rect x="%s" y="%s" width="%s" height="%s" rx="6" %s/>' % (x, y, w, h, a)
+        s = '<rect x="%s" y="%s" width="%s" height="%s" rx="4" %s/>' % (x, y, w, h, a)
         if f == "subproceso":
             s += '<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="%s" stroke-width="2"/><line x1="%s" y1="%s" x2="%s" y2="%s" stroke="%s" stroke-width="2"/>' % (x + 18, y, x + 18, y + h, borde, x + w - 18, y, x + w - 18, y + h, borde)
         return s
     if f == "preparacion":
-        return '<polygon points="%s,%s %s,%s %s,%s %s,%s %s,%s %s,%s" %s/>' % (x + 20, y, x + w - 20, y, x + w, cy, x + w - 20, y + h, x + 20, y + h, x, cy, a)
+        return '<polygon points="%s,%s %s,%s %s,%s %s,%s %s,%s %s,%s" %s/>' % (x + 18, y, x + w - 18, y, x + w, cy, x + w - 18, y + h, x + 18, y + h, x, cy, a)
     if f == "decision":
         return '<polygon points="%s,%s %s,%s %s,%s %s,%s" %s/>' % (cx, y, x + w, cy, cx, y + h, x, cy, a)
     if f == "datos":
-        return '<polygon points="%s,%s %s,%s %s,%s %s,%s" %s/>' % (x + 22, y, x + w, y, x + w - 22, y + h, x, y + h, a)
+        return '<polygon points="%s,%s %s,%s %s,%s %s,%s" %s/>' % (x + 20, y, x + w, y, x + w - 20, y + h, x, y + h, a)
     if f == "entrada-manual":
-        return '<polygon points="%s,%s %s,%s %s,%s %s,%s" %s/>' % (x + 26, y, x + w, y + 16, x + w, y + h, x, y + h, a)
+        return '<polygon points="%s,%s %s,%s %s,%s %s,%s" %s/>' % (x + 22, y, x + w, y + 14, x + w, y + h, x, y + h, a)
     if f == "documento":
-        d = "M%s,%s H%s V%s C%s,%s %s,%s %s,%s H%s Z" % (x, y, x + w, y + h - 14, x + w * .75, y + h + 8, x + w * .25, y + h - 26, x, y + h - 6, x)
+        d = "M%s,%s H%s V%s C%s,%s %s,%s %s,%s H%s Z" % (x, y, x + w, y + h - 13, x + w * .75, y + h + 7, x + w * .25, y + h - 24, x, y + h - 5, x)
         return '<path d="%s" %s/>' % (d, a)
     if f == "almacenamiento":
         return '<polygon points="%s,%s %s,%s %s,%s" %s/>' % (x, y, x + w, y, cx, y + h, a)
-    if f == "demora":
-        r = h / 2
-        return '<path d="M%s,%s H%s A%s,%s 0 0 1 %s,%s H%s Z" %s/>' % (x, y, x + w - r, r, r, x + w - r, y + h, x, a)
     if f == "base-de-datos":
         ry = 9
         return '<path d="M%s,%s V%s A%s,%s 0 0 0 %s,%s V%s A%s,%s 0 0 0 %s,%s Z" %s/>' % (x, y + ry, y + h - ry, w / 2, ry, x + w, y + h - ry, y + ry, w / 2, ry, x, y + ry, a)
     if f == "transporte":
-        return '<polygon points="%s,%s %s,%s %s,%s %s,%s %s,%s %s,%s" %s/>' % (x, y, x + w - 30, y, x + w - 30, y - 8, x + w, cy, x + w - 30, y + h + 8, x + w - 30, y + h, a)
+        return '<polygon points="%s,%s %s,%s %s,%s %s,%s %s,%s %s,%s" %s/>' % (x, y, x + w - 28, y, x + w - 28, y - 8, x + w, cy, x + w - 28, y + h + 8, x + w - 28, y + h, a)
     return '<ellipse cx="%s" cy="%s" rx="%s" ry="%s" %s/>' % (cx, cy, w / 2, h / 2, a)
 
 
-def texto_svg(lineas, x, y, clase="nodo", centro=None):
-    anclaje = ' text-anchor="middle"' if centro else ""
-    px = centro if centro else x
-    return ['<text x="%s" y="%s" class="%s"%s>%s</text>' % (px, y + j * 15, clase, anclaje, html.escape(ln)) for j, ln in enumerate(lineas)]
+ESTILO_ARISTA = {"normal": ("#1A1A1A", ""), "excepcion": ("#C2410C", ' stroke-dasharray="6 4"'),
+                 "retrabajo": ("#1D4ED8", ' stroke-dasharray="6 4"'), "rechazo": ("#B91C1C", ' stroke-dasharray="2 3"')}
 
 
-def elementos(pasos, juego):
-    lista = [{"tipo": "inicio", "p": {"paso": "Inicio del proceso"}}]
-    for p in pasos:
-        lista.append({"tipo": "paso", "p": p})
-    lista.append({"tipo": "fin", "p": {"paso": "Fin del caso"}})
-    return lista
-
-
-def dibujar_pagina(els, meta, juego, primera, ultima, letra_antes, letra_siguiente):
-    bboxes, svg, carriles = [], [], []
-    y = 46.0
-    if not primera:
-        svg.append(forma_svg("conector", X_MAIN + (ANCHO_NODO - 56) / 2, y, 56, 56, True))
-        svg += texto_svg([letra_antes], 0, y + 36, "nodo", centro=X_MAIN + ANCHO_NODO / 2)
-        bboxes.append((X_MAIN + (ANCHO_NODO - 56) / 2, y, 56, 56, "conector"))
-        carriles.append((y, y + 56, "viene de la hoja anterior"))
-        y += 56 + HUECO
-    for el in els:
-        p, tipo = el["p"], el["tipo"]
-        f = "inicio" if tipo == "inicio" else ("fin" if tipo == "fin" else resolver_forma(p, juego))
-        h, chars, extra = FORMAS.get(f, FORMAS["actividad"])
-        espera = minutos(p.get("espera", "")) if tipo == "paso" else 0
-        exc = (p.get("excepcion") or "").strip()
-        tiene_exc = tipo == "paso" and exc and exc.lower() != "ninguna"
-        y_banda = y
+def dibujar_hoja(figura, ids, rango, rutas, retorno, carril, alto, titulo, primera, ultima, letra_antes, letra_siguiente, bboxes, ancho=1200):
+    partes = ['<svg viewBox="0 0 %g %g" xmlns="http://www.w3.org/2000/svg" class="diagrama">' % (ancho, alto),
+              '<defs>' + "".join(
+                  '<marker id="flecha%s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="%s"/></marker>' % (k, c)
+                  for k, (c, d) in ESTILO_ARISTA.items()) + '</defs>']
+    for r in rutas:
+        if r["desde"] not in ids or r["hacia"] not in ids:
+            continue
+        color, dash = ESTILO_ARISTA.get(r["tipo"], ESTILO_ARISTA["normal"])
+        pts, (lx, ly), es_retorno = puntos_arista(figura, r, rango, retorno, carril)
+        d = "M" + " L".join("%.1f,%.1f" % p for p in pts)
+        partes.append('<path d="%s" fill="none" stroke="%s" stroke-width="2"%s marker-end="url(#flecha%s)"/>' % (d, color, dash, r["tipo"] if r["tipo"] in ESTILO_ARISTA else "normal"))
+        if r["etiqueta"]:
+            ancho_et = len(r["etiqueta"]) * 6.1 + 10
+            partes.append('<rect x="%.1f" y="%.1f" width="%.1f" height="15" rx="3" fill="#FFFFFF"/>' % (lx - 5, ly - 11, ancho_et))
+            partes.append('<text x="%.1f" y="%.1f" class="etiqueta-ruta">%s</text>' % (lx, ly, html.escape(r["etiqueta"])))
+    for i in ids:
+        f = figura[i]
+        n, solida = f["n"], clase_evidencia(f["n"]["evidencia"]) in SOLIDA or f["forma"] in ("inicio", "fin")
+        partes.append(forma_svg(f["forma"], f["x"], f["y"], f["ancho"], f["alto"], solida))
+        bboxes.append((f["x"], f["y"], f["ancho"], f["alto"], f["forma"]))
+        num = re.match(r"n?(\d+)$", i)
+        etiqueta = ("%s · %s" % (num.group(1), f["n"]["texto"])) if num else f["n"]["texto"]
+        lineas = wrap(etiqueta, FORMAS.get(f["forma"], FORMAS["actividad"])[3])
+        if f["forma"] == "decision":
+            partes += ['<text x="%.1f" y="%.1f" class="nodo" text-anchor="middle">%s</text>' % (f["x"] + f["ancho"] / 2, f["y"] + f["alto"] / 2 - 6 * (len(lineas) - 1) + 4, html.escape(l))
+                       for l in lineas]
+        elif f["forma"] == "conector":
+            partes.append('<text x="%.1f" y="%.1f" class="nodo" text-anchor="middle">%s</text>' % (f["x"] + f["ancho"] / 2, f["y"] + f["alto"] / 2 + 5, html.escape(lineas[0])))
+        else:
+            partes += ['<text x="%.1f" y="%.1f" class="nodo">%s</text>' % (f["x"] + 16, f["y"] + 26 + 16 * k, html.escape(l)) for k, l in enumerate(lineas)]
+        pie = " · ".join(x for x in [(f["n"]["quien"] or "").strip(), (f["n"]["sistema"] or "").strip()] if x)
+        espera = minutos(f["n"]["espera"])
         if espera > 0:
-            hd = FORMAS["demora"][0]
-            xd = X_MAIN + (ANCHO_NODO - ANCHO_ESPERA) / 2
-            svg.append(forma_svg("demora", xd, y, ANCHO_ESPERA, hd, True))
-            svg += texto_svg(["espera %s" % bonito(espera)], 0, y + hd / 2 + 5, "demora", centro=xd + ANCHO_ESPERA / 2)
-            bboxes.append((xd, y, ANCHO_ESPERA, hd, "demora"))
-            y += hd + HUECO_ESPERA
-        solida = clase_evidencia(p.get("evidencia", "")) in SOLIDA or tipo in ("inicio", "fin")
-        if f == "decision":
-            an = ANCHO_DEC
-        elif f == "demora":
-            an = ANCHO_ESPERA
-        elif f in ("operacion", "inspeccion", "conector"):
-            an = 150.0
-        else:
-            an = ANCHO_NODO
-        x = X_MAIN + (ANCHO_NODO - an) / 2
-        svg.append(forma_svg(f, x, y, an, h, solida))
-        rotulo = wrap(p.get("paso", ""), chars)
-        if f == "decision":
-            svg += texto_svg(rotulo, 0, y + h / 2 - 13 - 6 * (len(rotulo) - 1) + 5, "nodo", centro=x + an / 2)
-            if p.get("sistema"):
-                svg += texto_svg([p["sistema"][:30]], 0, y + h / 2 + 17, "mini", centro=x + an / 2)
-            if p.get("condicion"):
-                svg += texto_svg([wrap(p["condicion"], 26)[0]], 0, y + h + 17, "rama", centro=x + an / 2)
-        elif f == "conector":
-            svg += texto_svg(rotulo, 0, y + h / 2 + 5, "nodo", centro=x + an / 2)
-        else:
-            svg += texto_svg(rotulo, x + 16, y + 26, "nodo")
-            if p.get("sistema"):
-                svg += texto_svg([p["sistema"][:32]], x + 16, y + h - 14, "mini")
-        bboxes.append((x, y, an, h, f))
-        y += h + extra
-        if tiene_exc:
-            l_exc = wrap(exc, 22) + wrap(p.get("ruta") or "sin ruta declarada", 25)[:2]
-            if p.get("regreso"):
-                l_exc.append("vuelve al paso %s" % p["regreso"])
-            alto_exc = 16 + len(l_exc) * 13 + 8
-            y_exc = max(y_banda, y - extra - alto_exc + 4)
-            svg.append('<rect x="%s" y="%s" width="%s" height="%s" rx="4" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>' % (X_EXC, y_exc, ANCHO_EXC, alto_exc))
-            svg += texto_svg([l_exc[0]], X_EXC + 12, y_exc + 18, "exc")
-            svg += texto_svg(l_exc[1:], X_EXC + 12, y_exc + 33, "mini")
-            svg.append('<path d="M%s,%s L%s,%s" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#flechaNaranja)"/>' % (x + an + 10, y - extra - h / 2, X_EXC - 8, y_exc + alto_exc / 2))
-            if p.get("condicion"):
-                medio = (x + an + 10 + X_EXC - 8) / 2
-                svg += texto_svg([wrap(p["condicion"], 20)[0]], 0, y - extra - h / 2 - 7, "rama", centro=medio)
-            bboxes.append((X_EXC, y_exc, ANCHO_EXC, alto_exc, "excepcion"))
-            y = max(y, y_exc + alto_exc) + HUECO
-        else:
-            y += HUECO
-        carriles.append((y_banda, y, p.get("quien") or ""))
-    if not ultima:
-        svg.append(forma_svg("conector", X_MAIN + (ANCHO_NODO - 56) / 2, y, 56, 56, True))
-        svg += texto_svg([letra_siguiente], 0, y + 36, "nodo", centro=X_MAIN + ANCHO_NODO / 2)
-        bboxes.append((X_MAIN + (ANCHO_NODO - 56) / 2, y, 56, 56, "conector"))
-        carriles.append((y, y + 56, "sigue en la hoja siguiente"))
-        y += 56
-    alto = y + 30
-    cab = '<svg viewBox="0 0 %g %g" xmlns="http://www.w3.org/2000/svg" class="diagrama">' % (ANCHO_LIENZO, alto)
-    defs = ('<defs><marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1A1A1A"/></marker>'
-            '<marker id="flechaNaranja" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#C2410C"/></marker></defs>')
-    out = [cab, defs, '<line x1="%g" y1="6" x2="%g" y2="%g" stroke="#D1D5DB" stroke-width="1.5"/>' % (X_CARRIL, X_CARRIL, alto - 6)]
-    anterior = None
-    for y0, y1, quien in carriles:
-        if quien and quien != anterior:
-            out.append('<line x1="0" y1="%s" x2="%g" y2="%s" stroke="#D1D5DB" stroke-width="1.5"/>' % (y0, X_CARRIL, y0))
-            out.append('<text x="%s" y="%s" class="carril">%s</text>' % (X_CARRIL - 12, (y0 + y1) / 2 + 4, html.escape(quien[:22])))
-            anterior = quien
-    centros = [(b[0] + b[2] / 2, b[1], b[3]) for b in bboxes if b[4] != "excepcion"]
-    for (cx1, y1, h1), (cx2, y2, h2) in zip(centros, centros[1:]):
-        if y2 > y1 + h1:
-            out.append('<path d="M%s,%s L%s,%s" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>' % (cx1, y1 + h1, cx2, y2))
-    return "\n".join(out + svg + ["</svg>"]), bboxes, alto
+            pie = ("espera %s · " % bonito(espera)) + pie
+        if pie and f["forma"] == "decision":
+            partes.append('<text x="%.1f" y="%.1f" class="mini" text-anchor="middle">%s</text>' % (f["x"] + f["ancho"] / 2, f["y"] + f["alto"] - 12, html.escape(pie[:34])))
+        elif pie:
+            partes.append('<text x="%.1f" y="%.1f" class="mini">%s</text>' % (f["x"] + 16, f["y"] + f["alto"] - 12, html.escape(pie[:38])))
+    partes.append("</svg>")
+    return "\n".join(partes)
 
 
-def colisiones(bboxes):
-    fallas = []
-    for i in range(len(bboxes)):
-        for j in range(i + 1, len(bboxes)):
-            ax, ay, aw, ah, an = bboxes[i]
-            bx, by, bw, bh, bn = bboxes[j]
-            if ax < bx + bw and bx < ax + aw and ay < by + bh and by < ay + ah:
-                fallas.append((an, bn, round(ay), round(by)))
-    return fallas
-
-
-def paginas(pasos, juego, por_pagina):
-    els = elementos(pasos, juego)
-    if por_pagina <= 0 or len(els) <= por_pagina + 1:
-        return [els]
-    salida = []
-    i = 0
-    while i < len(els):
-        salida.append(els[i:i + por_pagina])
-        i += por_pagina
-    if len(salida) > 1 and len(salida[-1]) < 3:
-        salida[-2] += salida.pop()
-    return salida
-
-
-def dibujar(pasos, meta, juego="iso5807", por_pagina=7):
-    pags = paginas(pasos, juego, por_pagina)
-    svgs, cajas, altos = [], [], []
-    for i, els in enumerate(pags):
-        letra_antes = LETRAS[i - 1] if i > 0 else ""
-        letra_sig = LETRAS[i] if i < len(pags) - 1 else ""
-        s, b, a = dibujar_pagina(els, meta, juego, i == 0, i == len(pags) - 1, letra_antes, letra_sig)
-        svgs.append(s)
-        cajas.append(b)
-        altos.append(a)
-    return svgs, cajas, altos
-
-
-def mermaid(pasos, juego):
-    mapa = {"inicio": ("([", "])"), "fin": ("([", "])"), "actividad": ("[", "]"), "subproceso": ("[[", "]]"),
-            "preparacion": ("{{", "}}"), "decision": ("{", "}"), "datos": ("[/", "/]"), "documento": ("[/", "\\]"),
-            "entrada-manual": ("[/", "\\]"), "base-de-datos": ("[(", ")]"), "demora": ("(", ")"),
-            "almacenamiento": ("[\\", "/]"), "conector": ("((", "))"), "inspeccion": ("[[", "]]"),
-            "operacion": ("((", "))"), "transporte": (">", "]")}
-    out = ["```mermaid", "flowchart TB"]
-    ids = []
-    for i, p in enumerate(pasos):
-        f = resolver_forma(p, juego)
-        a, b = mapa.get(f, ("[", "]"))
-        if minutos(p.get("espera", "")) > 0:
-            out.append('  w%s(("espera %s"))' % (i, bonito(minutos(p["espera"]))))
-            ids.append("w%s" % i)
-        out.append('  n%s%s"%s"%s' % (i, a, p["paso"].replace('"', "'"), b))
-        ids.append("n%s" % i)
-    for a, b in zip(ids, ids[1:]):
-        out.append("  %s --> %s" % (a, b))
-    exc = [(i, p) for i, p in enumerate(pasos) if (p.get("excepcion") or "ninguna").lower() not in ("", "ninguna")]
-    if exc:
-        out += ["  subgraph rutas de excepcion", "    direction TB"]
-        for i, p in exc:
-            out.append('    e%s["%s: %s"]' % (i, p["excepcion"], p.get("ruta") or "sin ruta"))
-            out.append("    n%s -.-> e%s" % (i, i))
-        out.append("  end")
-    out.append("```")
-    return "\n".join(out)
-
-
-def resumen(pasos, juego):
-    cuenta = {}
-    for p in pasos:
-        f = resolver_forma(p, juego)
-        cuenta.setdefault(f, [0, 0.0])
-        cuenta[f][0] += 1
-        cuenta[f][1] += minutos(p.get("trabajo", ""))
-    demoras = [minutos(p.get("espera", "")) for p in pasos]
-    return cuenta, sum(d for d in demoras if d > 0), sum(1 for d in demoras if d > 0)
+def hoja_titulo(meta, i, total):
+    base = "Cómo camina el trabajo"
+    return base if total == 1 else "%s, hoja %d de %d" % (base, i + 1, total)
 
 
 CSS = (
@@ -342,47 +417,44 @@ CSS = (
     ".diagrama{width:100%;height:auto;display:block;}\n"
     ".nodo{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;fill:#1A1A1A;}\n"
     ".mini{font-family:'Inter',sans-serif;font-size:10px;fill:#6B7280;}\n"
-    ".exc{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;fill:#C2410C;}\n"
-    ".demora{font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;fill:#B45309;}\n"
-    ".carril{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:600;fill:#374151;text-anchor:end;}\n"
-    ".rama{font-family:'Inter',sans-serif;font-size:10.5px;font-weight:600;fill:#C2410C;}\n"
+    ".etiqueta-ruta{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;fill:#374151;}\n"
     "table{width:100%;border-collapse:collapse;font-size:9pt;}\n"
     "th,td{border:1pt solid var(--line);padding:4pt 6pt;text-align:left;vertical-align:top;}\n"
     "th{background:#F3F4F6;font-weight:600;}\n"
+    ".leyenda{display:flex;gap:14pt;font-size:8.5pt;color:#374151;margin:6pt 0 4pt;flex-wrap:wrap;}\n"
+    ".leyenda b{font-weight:600;}\n"
+    ".sw{display:inline-block;width:22pt;height:0;border-top:2pt solid #1A1A1A;vertical-align:middle;margin-right:3pt;}\n"
+    ".sw.exc{border-top-style:dashed;border-color:#C2410C;}\n"
+    ".sw.ret{border-top-style:dashed;border-color:#1D4ED8;}\n"
+    ".sw.rech{border-top-style:dotted;border-color:#B91C1C;}\n"
     ".pie{margin-top:14pt;border-top:1pt solid var(--line);padding-top:6pt;font-size:8pt;color:#4B5563;}\n"
-    "@media print{body{width:100%;padding:26pt;} .no-print{display:none;} .diagrama{max-height:190mm;width:auto;margin:0 auto;}}\n"
+    "@media print{body{width:100%;padding:26pt;} .diagrama{max-height:200mm;width:auto;max-width:100%;margin:0 auto;}}\n"
     "@page{size:letter;margin:0;}\n"
     "@media screen{body{width:auto;max-width:100%;padding:22pt 20pt;} .hoja + .hoja{break-before:auto;page-break-before:auto;}}\n")
 
 
-
-CAMPOS_FICHA = [("entradas", "a", "Entradas requeridas"), ("salidas", "a", "Salidas esperadas"),
-                ("secuencia", "b", "Secuencia e interaccion"), ("criterios", "c", "Criterios y metodos"),
-                ("recursos", "d", "Recursos necesarios"), ("responsables", "e", "Responsabilidades y autoridades"),
-                ("riesgos", "g", "Riesgos y oportunidades"), ("mejora", "h", "Evaluacion y mejora")]
-
-
 def ficha_html(meta):
-    filas = ""
-    for clave, letra, nombre in CAMPOS_FICHA:
-        valor = (meta.get(clave) or "").strip()
-        if valor:
-            filas += "<tr><td><b>%s</b> (%s)</td><td>%s</td></tr>" % (nombre, letra, html.escape(valor))
-    if not filas:
-        return ""
-    return '<h2>Ficha del proceso</h2><table><tr><th>Requisito de ISO 9001:2015, 4.4.1</th><th>Como se cumple aqui</th></tr>%s</table>' % filas
+    campos = [("entradas", "a", "Entradas requeridas"), ("salidas", "a", "Salidas esperadas"),
+              ("secuencia", "b", "Secuencia e interacción"), ("criterios", "c", "Criterios y métodos"),
+              ("recursos", "d", "Recursos necesarios"), ("responsables", "e", "Responsabilidades y autoridades"),
+              ("riesgos", "g", "Riesgos y oportunidades"), ("mejora", "h", "Evaluación y mejora")]
+    filas = "".join("<tr><td><b>%s</b> (%s)</td><td>%s</td></tr>" % (nombre, letra, html.escape(meta[clave]))
+                    for clave, letra, nombre in campos if meta.get(clave))
+    return ('<h2>Ficha del proceso</h2><table><tr><th>Requisito de ISO 9001:2015, 4.4.1</th><th>Cómo se cumple aquí</th></tr>%s</table>' % filas) if filas else ""
 
 
-def entregable(pasos, meta, juego, por_pagina=7):
-    svgs, _, _ = dibujar(pasos, meta, juego, por_pagina)
-    cuenta, espera_total, n_demoras = resumen(pasos, juego)
-    filas = "\n".join("<tr><td>%s</td><td>%d</td><td>%s</td></tr>" % (f, v[0], bonito(v[1])) for f, v in sorted(cuenta.items()))
-    sinobs = sum(1 for p in pasos if clase_evidencia(p.get("evidencia", "")) not in SOLIDA)
+def entregable(nodos, rutas, meta, juego, figura, rango, hojas, alto_total):
+    cuenta, espera_total, n_demoras = resumen(nodos, juego)
+    filas = "".join("<tr><td>%s</td><td>%d</td><td>%s</td></tr>" % (f, v[0], bonito(v[1])) for f, v in sorted(cuenta.items()))
+    sinobs = sum(1 for n in nodos if clase_evidencia(n["evidencia"]) not in SOLIDA)
+    decisiones = [n for n in nodos if resolver_forma(n["fila"], juego) == "decision"]
+    salidas = {}
+    for r in rutas:
+        salidas[r["desde"]] = salidas.get(r["desde"], 0) + 1
+    ramas = sum(1 for d in decisiones if salidas.get(d["id"], 0) >= 2)
+    retrabajos = sum(1 for r in rutas if r["tipo"] == "retrabajo")
     simb = "ISO 5807" if juego == "iso5807" else "cursograma OTIDA"
-    hojas = []
-    for i, s in enumerate(svgs):
-        titulo = "Cómo camina el trabajo" if len(svgs) == 1 else "Cómo camina el trabajo, hoja %d de %d" % (i + 1, len(svgs))
-        hojas.append('<div class="hoja"><h3>%s</h3>%s</div>' % (titulo, s))
+    cuerpo = "".join('<div class="hoja"><h3>%s</h3>%s</div>' % (hoja_titulo(meta, i, len(hojas)), s) for i, s in enumerate(hojas))
     return "\n".join([
         "<!DOCTYPE html>", '<html lang="es-MX"><head><meta charset="UTF-8">',
         '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
@@ -394,16 +466,79 @@ def entregable(pasos, meta, juego, por_pagina=7):
         '<div class="hallazgo">%s</div>' % html.escape(meta.get("hallazgo", "Sin hallazgo escrito todavía.")),
         ficha_html(meta),
         '<div class="contadores">',
-        '<div class="card"><b>%d</b><span>pasos</span></div>' % len(pasos),
+        '<div class="card"><b>%d</b><span>nodos</span></div>' % len(nodos),
+        '<div class="card"><b>%d</b><span>decisiones con dos o más salidas</span></div>' % ramas,
+        '<div class="card"><b>%d</b><span>rutas de retrabajo</span></div>' % retrabajos,
         '<div class="card"><b>%s</b><span>espera acumulada</span></div>' % bonito(espera_total),
-        '<div class="card"><b>%d</b><span>esperas registradas</span></div>' % n_demoras,
-        '<div class="card"><b>%d</b><span>pasos sin observar</span></div>' % sinobs,
         "</div>",
-        "".join(hojas),
+        '<div class="leyenda"><span><i class="sw"></i>camino normal</span><span><i class="sw exc"></i>ruta de excepción</span><span><i class="sw ret"></i>retrabajo, vuelve a un paso anterior</span><span><i class="sw rech"></i>rechazo o cierre terminal</span></div>',
+        cuerpo,
         "<h2>Resumen por símbolo</h2>",
         "<table><tr><th>Símbolo</th><th>Cantidad</th><th>Tiempo de trabajo</th></tr>%s</table>" % filas,
-        '<div class="pie">Generado desde la tabla de pasos del expediente, con los símbolos de %s. El diagrama no se edita a mano: si la tabla cambia, se vuelve a generar. Lectura de rutas: linea solida, camino normal; linea punteada naranja con su condicion escrita, ruta de excepcion; la leyenda vuelve al paso N, retrabajo. Los pasos en gris punteado están sin observar y no sostienen un rediseño todavía.</div>' % simb,
+        '<div class="pie">Generado desde las tablas de nodos y rutas del expediente, con los símbolos de %s. El diagrama no se edita a mano: si las tablas cambian, se vuelve a generar. Cada rombo declara su condición en la ruta que sale de él. Los nodos en gris punteado están sin observar y no sostienen un rediseño todavía. Pasos sin observar: %d.</div>' % (simb, sinobs),
         "</body></html>"])
+
+
+def mermaid(nodos, rutas, juego):
+    mapa = {"inicio": ("([", "])"), "fin": ("([", "])"), "actividad": ("[", "]"), "subproceso": ("[[", "]]"),
+            "preparacion": ("{{", "}}"), "decision": ("{", "}"), "datos": ("[/", "/]"), "documento": ("[/", "\\]"),
+            "entrada-manual": ("[/", "\\]"), "base-de-datos": ("[(", ")]"), "demora": ("(", ")"),
+            "almacenamiento": ("[\\", "/]"), "conector": ("((", "))"), "inspeccion": ("[[", "]]"),
+            "operacion": ("((", "))"), "transporte": (">", "]")}
+    out = ["```mermaid", "flowchart TB"]
+    for n in nodos:
+        a, b = mapa.get(resolver_forma(n["fila"], juego), ("[", "]"))
+        out.append('  %s%s"%s"%s' % (n["id"], a, n["texto"].replace('"', "'"), b))
+    for r in rutas:
+        flecha = " -.-> " if r["tipo"] != "normal" else " --> "
+        etiqueta = ("|%s|" % r["etiqueta"].replace("|", "/")) if r["etiqueta"] else ""
+        out.append("  %s%s%s%s" % (r["desde"], flecha, etiqueta, r["hacia"]))
+    out.append("```")
+    return "\n".join(out)
+
+
+def resumen(nodos, juego):
+    cuenta = {}
+    for n in nodos:
+        f = resolver_forma(n["fila"], juego)
+        cuenta.setdefault(f, [0, 0.0])
+        cuenta[f][0] += 1
+        cuenta[f][1] += minutos(n["trabajo"])
+    demoras = [minutos(n["espera"]) for n in nodos]
+    return cuenta, sum(d for d in demoras if d > 0), sum(1 for d in demoras if d > 0)
+
+
+def choques(bboxes):
+    fallas = []
+    for i in range(len(bboxes)):
+        for j in range(i + 1, len(bboxes)):
+            ax, ay, aw, ah, an = bboxes[i]
+            bx, by, bw, bh, bn = bboxes[j]
+            if ax < bx + bw and bx < ax + aw and ay < by + bh and by < ay + ah:
+                fallas.append((an, bn))
+    return fallas
+
+
+def cruces(figura, ids, rutas, rango, retorno, carril):
+    """Detecta aristas que atraviesan una forma que no es su origen ni su destino."""
+    fallas = []
+    for r in rutas:
+        if r["desde"] not in ids or r["hacia"] not in ids:
+            continue
+        pts, _, _ = puntos_arista(figura, r, rango, retorno, carril)
+        for k in range(len(pts) - 1):
+            (x1, y1), (x2, y2) = pts[k], pts[k + 1]
+            for i in ids:
+                if i in (r["desde"], r["hacia"]):
+                    continue
+                f = figura[i]
+                if x1 == x2:
+                    if f["x"] < x1 < f["x"] + f["ancho"] and min(y1, y2) < f["y"] + f["alto"] and f["y"] < max(y1, y2):
+                        fallas.append((r["desde"], r["hacia"], i))
+                elif y1 == y2:
+                    if f["y"] < y1 < f["y"] + f["alto"] and min(x1, x2) < f["x"] + f["ancho"] and f["x"] < max(x1, x2):
+                        fallas.append((r["desde"], r["hacia"], i))
+    return fallas
 
 
 def main():
@@ -416,50 +551,103 @@ def main():
         print("generar-diagrama: no existe la nota", nota)
         return 2
     juego = args[args.index("--set") + 1] if "--set" in args else "iso5807"
-    por_pagina = int(args[args.index("--por-pagina") + 1]) if "--por-pagina" in args else 7
     if juego not in ("iso5807", "cursograma"):
         print("generar-diagrama: el juego de simbolos debe ser iso5807 o cursograma")
         return 2
+    limite = int(args[args.index("--por-hoja") + 1]) if "--por-hoja" in args else 1150
     texto = nota.read_text(encoding="utf-8")
-    pasos = leer_tabla(texto)
-    if not pasos:
-        print("generar-diagrama: no encontre la tabla de pasos en", nota)
+    meta, tablas = leer_secciones(texto)
+    nodos, rutas = grafo(meta, tablas)
+    if not nodos:
+        print("generar-diagrama: no encontre nodos ni tabla de pasos en", nota)
         return 1
-    meta = {}
-    for etiqueta, clave in (("Cliente:", "cliente"), ("Proceso:", "proceso"), ("Fase:", "fase"), ("Hallazgo:", "hallazgo"),
-                            ("Entradas:", "entradas"), ("Salidas:", "salidas"), ("Secuencia:", "secuencia"),
-                            ("Criterios:", "criterios"), ("Recursos:", "recursos"), ("Responsables:", "responsables"),
-                            ("Riesgos:", "riesgos"), ("Mejora:", "mejora")):
-        m = re.search(re.escape(etiqueta) + r"\s*(.+)", texto)
-        if m:
-            meta[clave] = m.group(1).strip()
-    svgs, cajas, altos = dibujar(pasos, meta, juego, por_pagina)
-    choques = [c for pagina in cajas for c in colisiones(pagina)]
-    desconocidas = sorted({(p.get("forma") or "").lower() for p in pasos if (p.get("forma") or "").lower() and (p.get("forma") or "").lower() not in FORMAS})
-    der = mermaid(pasos, juego)
+    figura, rango, por_rango, salidas, entradas, retorno, carril, ancho, alto_total = acomodar(nodos, rutas, juego)
+    desconocidas = sorted({(n["fila"].get("forma") or "").lower() for n in nodos if (n["fila"].get("forma") or "").lower() and (n["fila"].get("forma") or "").lower() not in FORMAS})
+    hojas, bboxes_por_hoja, rangos_hoja = [], [], []
+    actual, alto_actual = [], 0
+    for k in sorted(por_rango):
+        alto_k = max(figura[i]["alto"] for i in por_rango[k]) + SEP_Y
+        if actual and alto_actual + alto_k > limite:
+            rangos_hoja.append(actual)
+            actual, alto_actual = [], 0
+        actual.append(k)
+        alto_actual += alto_k
+    if actual:
+        rangos_hoja.append(actual)
+    pagina = {}
+    for idx, ks in enumerate(rangos_hoja):
+        for k in ks:
+            for i in por_rango[k]:
+                pagina[i] = idx
+    sinteticas = {}
+    usados = {}
+    for r in rutas:
+        pd, ph = pagina.get(r["desde"]), pagina.get(r["hacia"])
+        if pd is None or ph is None or pd == ph:
+            continue
+        src, dst = figura[r["desde"]], figura[r["hacia"]]
+        for idx, letra, es_salida in ((pd, LETRAS[ph], True), (ph, LETRAS[pd], False)):
+            if es_salida:
+                sid = "c%s%s" % (r["desde"], LETRAS[ph])
+                sy = src["y"] + src["alto"] + 14
+                sx = src["x"] + src["ancho"] / 2 - 25
+            else:
+                sid = "c%s%s" % (r["hacia"], LETRAS[pd])
+                sy = max(6.0, dst["y"] - 58)
+                sx = dst["x"] + dst["ancho"] / 2 - 25
+            usados[(idx, sid)] = usados.get((idx, sid), 0) + 1
+            sx += 66 * (usados[(idx, sid)] - 1)
+            figura[sid] = {"n": {"id": sid, "texto": letra, "fila": {"forma": "conector"}, "quien": "", "sistema": "", "trabajo": "", "espera": "", "evidencia": "observado"},
+                           "forma": "conector", "ancho": 50, "alto": 50, "lineas": [letra], "x": sx, "y": sy}
+            sinteticas.setdefault(idx, {"nodos": [], "rutas": []})
+            if sid not in sinteticas[idx]["nodos"]:
+                sinteticas[idx]["nodos"].append(sid)
+            if es_salida:
+                sinteticas[idx]["rutas"].append({"desde": r["desde"], "hacia": sid, "etiqueta": "continua en la hoja %s" % LETRAS[ph], "tipo": r["tipo"], "sintetica": True})
+            else:
+                sinteticas[idx]["rutas"].append({"desde": sid, "hacia": r["hacia"], "etiqueta": "viene de la hoja %s" % LETRAS[pd], "tipo": r["tipo"], "sintetica": True})
+    for idx, ks in enumerate(rangos_hoja):
+        ids = [i for k in ks for i in por_rango[k]] + sinteticas.get(idx, {}).get("nodos", [])
+        base = min(figura[i]["y"] for i in ids) - 70
+        for i in ids:
+            figura[i]["y"] -= base
+        alto = max(figura[i]["y"] + figura[i]["alto"] for i in ids) + 80
+        rutas_hoja = [dict(r) for r in rutas if r["desde"] in ids and r["hacia"] in ids] + sinteticas.get(idx, {}).get("rutas", [])
+        bboxes = []
+        s = dibujar_hoja(figura, ids, rango, rutas_hoja, retorno, carril, alto, "", idx == 0, idx == len(rangos_hoja) - 1, LETRAS[idx - 1] if idx else "", LETRAS[idx] if idx < len(rangos_hoja) - 1 else "", bboxes, ancho)
+        hojas.append(s)
+        bboxes_por_hoja.append(bboxes)
+        for i in ids:
+            figura[i]["y"] += base
+    choques_totales = [c for pagina in bboxes_por_hoja for c in choques(pagina)]
+    cruces_totales = cruces(figura, [n["id"] for n in nodos], rutas, rango, retorno, carril)
+    der = mermaid(nodos, rutas, juego)
     if "--diagnostico" in args:
-        cuenta, espera_total, n_demoras = resumen(pasos, juego)
-        print("hojas: %d | alto de cada hoja: %s" % (len(svgs), [round(a) for a in altos]))
+        cuenta, espera_total, n_demoras = resumen(nodos, juego)
+        salidas_n = {}
+        for r in rutas:
+            salidas_n[r["desde"]] = salidas_n.get(r["desde"], 0) + 1
+        decisiones = [n["id"] for n in nodos if resolver_forma(n["fila"], juego) == "decision"]
+        print("nodos: %d | rutas: %d | hojas: %d" % (len(nodos), len(rutas), len(hojas)))
+        print("capas: %d | ancho del dibujo: %d | alto: %d" % (len(por_rango), ancho, alto_total))
         print("formas:", dict((k, v[0]) for k, v in sorted(cuenta.items())))
+        print("decisiones: %d, con dos o mas salidas: %d" % (len(decisiones), sum(1 for d in decisiones if salidas_n.get(d, 0) >= 2)))
+        print("rutas de retrabajo:", sum(1 for r in rutas if r["tipo"] == "retrabajo"), "| de excepcion:", sum(1 for r in rutas if r["tipo"] == "excepcion"), "| de rechazo:", sum(1 for r in rutas if r["tipo"] == "rechazo"))
         print("esperas: %d, total %s" % (n_demoras, bonito(espera_total)))
-        print("traslapes:", choques if choques else "ninguno")
-        # huecos entre formas consecutivas del eje, por hoja
-        for i, pagina in enumerate(cajas):
-            eje = sorted([b for b in pagina if b[4] != "excepcion"], key=lambda b: b[1])
-            huecos = [round(eje[k + 1][1] - (eje[k][1] + eje[k][3])) for k in range(len(eje) - 1)]
-            print("  hoja %d: %d formas, hueco minimo %s" % (i + 1, len(eje), min(huecos) if huecos else "-"))
+        print("traslapes:", choques_totales if choques_totales else "ninguno")
+        print("rutas que atraviesan una forma:", sorted(set(cruces_totales)) if cruces_totales else "ninguna")
         print("formas desconocidas:", desconocidas if desconocidas else "ninguna")
-        return 1 if (choques or desconocidas) else 0
+        return 1 if (choques_totales or cruces_totales or desconocidas) else 0
     if desconocidas:
         print("generar-diagrama: formas que no existen en el juego %s: %s" % (juego, ", ".join(desconocidas)))
         return 1
-    if choques:
-        print("generar-diagrama: el acomodo produce %d traslapes: %s" % (len(choques), choques[:3]))
+    if choques_totales:
+        print("generar-diagrama: el acomodo produce %d traslapes: %s" % (len(choques_totales), choques_totales[:3]))
         return 1
     if "--check" in args:
         actual = re.search(re.escape(INICIO) + r"(.*?)" + re.escape(FIN), texto, re.S)
         if not actual or actual.group(1).strip() != der.strip():
-            print("generar-diagrama: el diagrama de la nota no coincide con la tabla de pasos")
+            print("generar-diagrama: el diagrama de la nota no coincide con las tablas de nodos y rutas")
             return 1
         print("generar-diagrama: el diagrama esta al dia")
         return 0
@@ -467,13 +655,14 @@ def main():
     if INICIO in texto and FIN in texto:
         texto = re.sub(re.escape(INICIO) + r".*?" + re.escape(FIN), lambda m: bloque, texto, flags=re.S)
     else:
-        texto = texto.rstrip() + "\n## Diagrama del plano\nEl dibujo se genera desde la tabla de arriba y no se edita a mano.\n" + bloque + "\n"
+        texto = texto.rstrip() + "\n## Diagrama del plano\nEl dibujo se genera desde las tablas de nodos y rutas y no se edita a mano.\n" + bloque + "\n"
     nota.write_text(texto, encoding="utf-8")
-    cuenta, espera_total, n_demoras = resumen(pasos, juego)
-    print("generar-diagrama: %d pasos en %d hojas | esperas %d (%s) | sin observar %d | traslapes 0" % (len(pasos), len(svgs), n_demoras, bonito(espera_total), sum(1 for p in pasos if clase_evidencia(p.get("evidencia", "")) not in SOLIDA)))
+    cuenta, espera_total, n_demoras = resumen(nodos, juego)
+    print("generar-diagrama: %d nodos, %d rutas, %d hojas | retrabajos %d | esperas %d (%s) | traslapes 0 | cruces 0" % (
+        len(nodos), len(rutas), len(hojas), sum(1 for r in rutas if r["tipo"] == "retrabajo"), n_demoras, bonito(espera_total)))
     if "--html" in args:
         salida = pathlib.Path(args[args.index("--html") + 1])
-        salida.write_text(entregable(pasos, meta, juego, por_pagina), encoding="utf-8")
+        salida.write_text(entregable(nodos, rutas, meta, juego, figura, rango, hojas, alto_total), encoding="utf-8")
         print("generar-diagrama: entregable escrito en", salida)
     return 0
 

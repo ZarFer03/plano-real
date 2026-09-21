@@ -42,6 +42,19 @@ El resumen del cursograma clasico, con la cuenta por tipo de actividad y el tiem
 - **Certeza visible.** Lo observado, medido o firmado va en linea solida. Lo que solo se dijo, o que nadie vio ejecutar, va en gris punteado. El dibujo nunca afirma mas que la evidencia.
 - **Una sola columna principal, y se pagina.** El diagrama no se estira hasta hacerse ilegible: cuando el proceso no cabe con aire en una hoja, se corta y se une con el simbolo de conector (A, B, C), que es exactamente para lo que existe. El generador corta solo, cada siete elementos por hoja, y numera las hojas.
 
+## Las cuatro clases de ruta
+
+El tipo de una ruta no es decoración: cambia el trazo y cambia el significado.
+
+| tipo | trazo | qué significa |
+|---|---|---|
+| `normal` | línea sólida negra | el camino que el caso sigue cuando todo sale bien |
+| `excepcion` | punteada naranja | el caso se desvía porque algo no se cumplió |
+| `retrabajo` | punteada azul, por el carril exterior | el camino vuelve a un paso anterior. Es el que se cobra dos veces |
+| `rechazo` | punteada roja corta | el caso se cierra sin continuar. Es un final, no una pausa |
+
+Una decisión sin dos salidas etiquetadas no está documentada: está dibujada.
+
 ## Lo que el generador verifica solo
 - Que no haya dos formas encimadas: si el acomodo produce un traslape, lo reporta y no entrega.
 - Que el diagrama de la nota corresponda a la tabla: si la tabla cambio y no se regenero, la auditoria del expediente lo marca como vencido.

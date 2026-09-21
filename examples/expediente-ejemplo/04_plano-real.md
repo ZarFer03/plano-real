@@ -1,88 +1,106 @@
 # 04, Plano real, ejemplo
 Cliente: Taller de flotillas (ejemplo inventado, sin datos de ninguna empresa)
-Proceso: Alta y cierre de una orden de servicio
+Proceso: Control de la documentación del sistema de gestión
 Fase: 2, plano real
 Evidencia dominante: observado
-Hallazgo: El caso espera mas de un dia sin que nadie lo trabaje, y la espera no esta en el area que todos culpan.
-Entradas: solicitud del chofer por WhatsApp, unidad disponible, presupuesto del area
-Salidas: orden de servicio cerrada, unidad reparada, factura emitida
-Secuencia: recibe el jefe de patio, captura el auxiliar, autoriza y asigna el jefe de patio, ejecuta el mecanico, cotiza y compra compras, avisa atencion a clientes, cierra administracion
-Criterios: autorizacion del jefe de patio hasta 8 mil pesos, arriba de eso direccion, refaccion por proveedor unico
-Recursos: pizarron de patio, hoja de servicios en Excel, sistema contable, proveedor de refacciones
-Responsables: jefe de patio es dueno del proceso, direccion autoriza el gasto mayor, administracion cierra y factura
-Riesgos: caso sin responsable mientras espera refaccion, presupuesto autorizado sin registro, dato de la unidad capturado a mano
-Mejora: se cuenta el mismo metodo cada trimestre y se compara contra la linea base
-Casos caminados: caso A, 2026-09-18, con el jefe de patio. Caso B, 2026-09-19, con el mecanico.
-| id | paso | quien | sistema | forma | tipo | condicion | excepcion | ruta | regreso | trabajo | espera | evidencia |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Recibe la solicitud de la unidad | jefe de patio | WhatsApp | datos | ejecuta | falta un dato | por dato faltante | ruta B: pide el dato al chofer | 1 | 5 min | 5 min | [observado] caso A caminado con el jefe de patio, el 2026-09-18 |
-| 2 | Captura en la hoja de servicios | auxiliar administrativo | Excel | documento | ejecuta | | ninguna | | | 12 min | 4 h | [observado] caso A caminado con el jefe de patio, el 2026-09-18 |
-| 3 | Valida el presupuesto autorizado | jefe de patio | Excel | decision | decide | no autorizado | por autorizacion | ruta D: sube a direccion | 3 | 8 min | 1 d | [observado] caso A caminado con el jefe de patio, el 2026-09-18 |
-| 4 | Asigna unidad y mecanico | jefe de patio | pizarron | decision | decide | no hay unidad libre | por capacidad | ruta E: espera unidad libre | 4 | 10 min | 3 h | [observado] caso A caminado con el jefe de patio, el 2026-09-18 |
-| 5 | Levanta el diagnostico tecnico | mecanico | papel | documento | ejecuta | | ninguna | | | 45 min | 2 h | [observado] caso B caminado con el mecanico, el 2026-09-19 |
-| 6 | Cotiza refacciones | compras | correo | documento | ejecuta | arriba de 8 mil | por monto | ruta C: sube a direccion | 6 | 25 min | 6 h | [medido] 12 casos en la ventana de 3 dias, promedio 6 h de espera |
-| 7 | Solicita refacciones al proveedor | compras | proveedor | datos | ejecuta | | ninguna | | | 15 min | 2 d | [dicho] "el proveedor depende de si hay credito" (compras, 2026-09-19) |
-| 8 | Ejecuta la reparacion | mecanico | taller | actividad | ejecuta | falta refaccion | por sistema | ruta F: no hay refaccion alternativa | 8 | 3 h | 1 d | [observado] caso B caminado con el mecanico, el 2026-09-19 |
-| 9 | Avisa al cliente | atencion a clientes | WhatsApp | datos | ejecuta | | ninguna | | | 6 min | 30 min | [observado] caso A caminado con el jefe de patio, el 2026-09-18 |
-| 10 | Cierra y factura | administracion | sistema contable | base-de-datos | ejecuta | falta un dato | por dato faltante | ruta B: pide el dato al chofer | 1 | 20 min | 5 h | sin observar |
+Hallazgo: El documento tarda once días en llegar al punto de uso, y ocho de esos días son espera de una firma. Nadie trabaja el documento en ese tiempo.
+Entradas: necesidad de crear o cambiar un documento, formato vigente, lista de verificación de calidad
+Salidas: documento aprobado y vigente en el punto de uso, versión anterior retirada y marcada obsoleta
+Secuencia: se solicita el cambio, se elabora el borrador, calidad revisa el formato, dirección aprueba, se codifica y publica, se retira la versión anterior, se revisa cada año
+Criterios: la revisión de formato la hace calidad, la aprobación la hace dirección, un cambio crítico exige capacitación antes de publicar
+Recursos: formato de documento controlado, lista de verificación, carpeta compartida, archivo de versiones obsoletas
+Responsables: calidad es dueño del proceso, dirección aprueba, el dueño del proceso elabora
+Riesgos: documento obsoleto en uso por no retirarlo, cambio crítico sin capacitar, versión sin fecha de revisión
+Mejora: se cuenta el mismo método cada trimestre y se compara contra la línea base
+Casos caminados: caso A, 2026-09-18, con la responsable de calidad. Caso B, 2026-09-19, con dirección.
+
+## Nodos
+
+| id | texto | forma | quien | sistema | trabajo | espera | evidencia |
+|---|---|---|---|---|---|---|---|
+| n1 | Necesidad de crear o cambiar un documento | inicio | dueño del proceso | correo | 5 min | 1 d | [dicho] "casi siempre lo piden por correo o por WhatsApp" (calidad, 2026-09-18) |
+| n2 | Solicita la creación o el cambio | datos | dueño del proceso | correo | 10 min | 1 d | [observado] caso A caminado con calidad, el 2026-09-18 |
+| n3 | Elabora el borrador del documento | documento | dueño del proceso | Word | 2 h | 2 d | [observado] caso A caminado con calidad, el 2026-09-18 |
+| n4 | ¿El borrador cumple el formato? | decision | calidad | lista de verificación | 15 min | 1 d | [observado] caso A caminado con calidad, el 2026-09-18 |
+| n5 | Devuelve el borrador con observaciones | documento | calidad | correo | 20 min | 1 d | [observado] dos devoluciones en el caso A, el 2026-09-18 |
+| n6 | ¿La dirección aprueba el documento? | decision | dirección | correo | 10 min | 3 d | [observado] caso B caminado con dirección, el 2026-09-19 |
+| n7 | Archiva la versión rechazada y cierra la solicitud | documento | calidad | carpeta compartida | 15 min | 0 | [dicho] "cuando dirección rechaza, ahí se queda" (calidad, 2026-09-18) |
+| n8 | Asigna código, versión y fecha de revisión | actividad | calidad | Excel | 10 min | 1 d | [observado] caso A caminado con calidad, el 2026-09-18 |
+| n9 | ¿Qué alcance tiene el cambio? | decision | calidad | Excel | 5 min | 0 | [dicho] "el alcance lo decide quien revisa" (calidad, 2026-09-18) |
+| n10 | Actualiza el documento y su fecha de revisión | actividad | dueño del proceso | Word | 40 min | 2 d | [dicho] "si es menor, lo cambio y ya" (calidad, 2026-09-18) |
+| n11 | Sube la nueva versión a dirección para otra aprobación | actividad | calidad | correo | 15 min | 3 d | [observado] caso B caminado con dirección, el 2026-09-19 |
+| n12 | Capacita al personal antes de publicar el cambio | actividad | calidad | sala de juntas | 1 h | 5 d | [medido] 3 casos en la ventana de 3 días, 5 d de espera promedio |
+| n13 | Publica el documento vigente en el punto de uso | actividad | calidad | carpeta compartida | 20 min | 1 d | [observado] caso A caminado con calidad, el 2026-09-18 |
+| n14 | Retira la versión anterior y la marca obsoleta | almacenamiento | calidad | archivo de versiones | 10 min | 0 | [observado] caso A caminado con calidad, el 2026-09-18 |
+| n15 | ¿La revisión anual encontró cambios? | decision | calidad | calendario | 5 min | 0 | [dicho] "la revisión anual casi no se hace" (calidad, 2026-09-18) |
+| n16 | Documento vigente en uso | fin | | | | | [observado] |
+| n17 | Solicitud cerrada sin documento | fin | | | | | sin observar |
+
+## Rutas
+
+| desde | hacia | etiqueta | tipo |
+|---|---|---|---|
+| n1 | n2 | pide el cambio | normal |
+| n2 | n3 | | normal |
+| n3 | n4 | borrador listo | normal |
+| n4 | n5 | no cumple el formato | excepcion |
+| n5 | n3 | corrige y vuelve a elaborar | retrabajo |
+| n4 | n6 | cumple el formato | normal |
+| n6 | n7 | dirección rechaza | rechazo |
+| n7 | n17 | cierra sin documento | normal |
+| n6 | n8 | dirección aprueba | normal |
+| n8 | n9 | | normal |
+| n9 | n10 | cambio menor | normal |
+| n9 | n11 | cambio mayor | normal |
+| n9 | n12 | cambio crítico | normal |
+| n11 | n6 | vuelve a aprobación | retrabajo |
+| n10 | n13 | | normal |
+| n12 | n13 | | normal |
+| n13 | n14 | | normal |
+| n14 | n15 | | normal |
+| n15 | n16 | sin cambios | normal |
+| n15 | n2 | con cambios, abre solicitud nueva | retrabajo |
 ## Diagrama del plano
-El dibujo se genera desde la tabla de arriba y no se edita a mano.
+El dibujo se genera desde las tablas de nodos y rutas y no se edita a mano.
 <!-- diagrama:inicio -->
 ```mermaid
 flowchart TB
-  w0(("espera 5 min"))
-  n0[/"Recibe la solicitud de la unidad"/]
-  w1(("espera 4 h"))
-  n1[/"Captura en la hoja de servicios"\]
-  w2(("espera 1 d"))
-  n2{"Valida el presupuesto autorizado"}
-  w3(("espera 3 h"))
-  n3{"Asigna unidad y mecanico"}
-  w4(("espera 2 h"))
-  n4[/"Levanta el diagnostico tecnico"\]
-  w5(("espera 6 h"))
-  n5[/"Cotiza refacciones"\]
-  w6(("espera 2 d"))
-  n6[/"Solicita refacciones al proveedor"/]
-  w7(("espera 1 d"))
-  n7["Ejecuta la reparacion"]
-  w8(("espera 30 min"))
-  n8[/"Avisa al cliente"/]
-  w9(("espera 5 h"))
-  n9[("Cierra y factura")]
-  w0 --> n0
-  n0 --> w1
-  w1 --> n1
-  n1 --> w2
-  w2 --> n2
-  n2 --> w3
-  w3 --> n3
-  n3 --> w4
-  w4 --> n4
-  n4 --> w5
-  w5 --> n5
-  n5 --> w6
-  w6 --> n6
-  n6 --> w7
-  w7 --> n7
-  n7 --> w8
-  w8 --> n8
-  n8 --> w9
-  w9 --> n9
-  subgraph rutas de excepcion
-    direction TB
-    e0["por dato faltante: ruta B: pide el dato al chofer"]
-    n0 -.-> e0
-    e2["por autorizacion: ruta D: sube a direccion"]
-    n2 -.-> e2
-    e3["por capacidad: ruta E: espera unidad libre"]
-    n3 -.-> e3
-    e5["por monto: ruta C: sube a direccion"]
-    n5 -.-> e5
-    e7["por sistema: ruta F: no hay refaccion alternativa"]
-    n7 -.-> e7
-    e9["por dato faltante: ruta B: pide el dato al chofer"]
-    n9 -.-> e9
-  end
+  n1(["Necesidad de crear o cambiar un documento"])
+  n2[/"Solicita la creación o el cambio"/]
+  n3[/"Elabora el borrador del documento"\]
+  n4{"¿El borrador cumple el formato?"}
+  n5[/"Devuelve el borrador con observaciones"\]
+  n6{"¿La dirección aprueba el documento?"}
+  n7[/"Archiva la versión rechazada y cierra la solicitud"\]
+  n8["Asigna código, versión y fecha de revisión"]
+  n9{"¿Qué alcance tiene el cambio?"}
+  n10["Actualiza el documento y su fecha de revisión"]
+  n11["Sube la nueva versión a dirección para otra aprobación"]
+  n12["Capacita al personal antes de publicar el cambio"]
+  n13["Publica el documento vigente en el punto de uso"]
+  n14[\"Retira la versión anterior y la marca obsoleta"/]
+  n15{"¿La revisión anual encontró cambios?"}
+  n16(["Documento vigente en uso"])
+  n17(["Solicitud cerrada sin documento"])
+  n1 --> |pide el cambio|n2
+  n2 --> n3
+  n3 --> |borrador listo|n4
+  n4 -.-> |no cumple el formato|n5
+  n5 -.-> |corrige y vuelve a elaborar|n3
+  n4 --> |cumple el formato|n6
+  n6 -.-> |dirección rechaza|n7
+  n7 --> |cierra sin documento|n17
+  n6 --> |dirección aprueba|n8
+  n8 --> n9
+  n9 --> |cambio menor|n10
+  n9 --> |cambio mayor|n11
+  n9 --> |cambio crítico|n12
+  n11 -.-> |vuelve a aprobación|n6
+  n10 --> n13
+  n12 --> n13
+  n13 --> n14
+  n14 --> n15
+  n15 --> |sin cambios|n16
+  n15 -.-> |con cambios, abre solicitud nueva|n2
 ```
 <!-- diagrama:fin -->

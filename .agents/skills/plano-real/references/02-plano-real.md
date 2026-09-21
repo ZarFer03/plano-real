@@ -11,27 +11,34 @@ El plano no se dibuja en una junta ni se reconstruye de memoria. Se camina:
 7. Caminar un segundo caso de una variante distinta, aunque sea corto, para ver qué cambia.
 Casos mínimos antes de cerrar el plano: uno del caso frecuente, uno de un cliente o variante distinta, uno con excepción, y uno que haya sido urgente. Si alguno no existe en la ventana, se anota y se dice, no se rellena con lo que se supone.
 ## El modelo de datos del plano
-Una fila por paso, en este orden de columnas:
-| id | paso | quién (puesto) | sistema | entrada | salida | trabajo | espera | tipo | excepción | ruta alterna | evidencia |
-|---|---|---|---|---|---|---|---|---|---|---|---|
+El flujo son **dos tablas**, no una lista. Una lista no puede representar un grafo: siempre sale un dibujo lineal aunque el proceso no lo sea.
+
+**Tabla de nodos**, una fila por paso del proceso:
+| id | texto | forma | quien | sistema | trabajo | espera | evidencia |
+|---|---|---|---|---|---|---|---|
+**Tabla de rutas**, una fila por cada camino entre dos nodos:
+| desde | hacia | etiqueta | tipo |
+|---|---|---|---|
 Valores fijos que no se improvisan:
-- **tipo**: `ejecuta`, `decide`, `revisa`, `avisa`, `espera`.
-- **trabajo** y **espera**: en minutos u horas, y la espera es el tiempo en que el caso no avanza porque alguien no lo empujó. Confundirlas destruye el diagnóstico: casi siempre el problema no es que trabajen lento, es que el caso espera.
-- **excepción**: la familia de las siete, o `ninguna`.
-- **ruta alterna**: la letra de la ruta de excepción cuando el paso se desvía.
+- **forma**: `inicio`, `fin`, `actividad`, `documento`, `datos`, `decision`, `demora`, `base-de-datos`, `almacenamiento`, `preparacion`, `subproceso`, `conector`, `entrada-manual`. De ahí sale el símbolo.
+- **tipo** de ruta: `normal`, `excepcion`, `retrabajo`, `rechazo`. Un `retrabajo` es un camino que vuelve a un paso anterior. Un `rechazo` cierra el caso sin reincorporarse.
+- **etiqueta**: la condición escrita con palabras del cliente, no un sí o un no genérico. En un rombo, la etiqueta es la respuesta que abre ese camino.
+- **trabajo** y **espera**: en minutos, horas o días, y la espera es el tiempo en que el caso no avanza porque alguien no lo empujó. Confundirlas destruye el diagnóstico: casi siempre el problema no es que trabajen lento, es que el caso espera.
 - **evidencia**: la clase y su recibo, en el formato de las convenciones. Un paso `dicho` se marca y no se toca.
+Si el expediente ya traía la tabla vieja de pasos, el generador la convierte a nodos y rutas: la arista principal es la cadena, y cada excepción se vuelve un nodo con su camino de ida y su regreso.
 ## Los tres contadores del plano
 1. **Manos**: cuántas veces cambia de dueño el caso. Cada cambio de manos es un lugar donde se puede caer.
 2. **Esperas**: cuántos tiempos muertos acumula. Se suman y se expresan también en días de calendario, no solo en horas.
 3. **Puntos de decisión**: dónde alguien tiene que juzgar algo. Cada uno es un lugar donde el proceso depende de que esa persona esté.
 Estos tres números son los que el cliente entiende de inmediato, más que cualquier diagrama.
 ## El diagrama
-Mermaid dentro del propio `.md`, que se renderiza en Obsidian y en los documentos, sin plugins ni herramientas externas.
-- El flujo principal va en una sola dirección, con nodos por paso y el sistema en la etiqueta de la arista.
-- Las rutas de excepción van en un subgrafo aparte, con línea punteada, y vuelven al paso donde se reincorporan.
-- Los puntos de decisión se dibujan como rombos, y el camino de cada respuesta se etiqueta con la condición, no con un sí o un no genérico.
-- Los nodos de espera se marcan con el tiempo entre paréntesis.
-Regla: si el diagrama no se puede leer en un teléfono, se parte en dos.
+Lo genera `scripts/generar-diagrama.py` desde las dos tablas: un SVG profesional en el entregable, y un bloque Mermaid dentro de la nota como vista editable. El dibujo no se edita a mano; si las tablas cambian y el diagrama no, la auditoría lo marca vencido.
+- **Un rombo declara sus salidas.** Un rombo con una sola salida no es una decisión, es un adorno: o tiene dos o más rutas con su etiqueta, o la forma está mal elegida.
+- **Los caminos se ven separarse y volver a juntarse.** Si todas las rutas terminan en el mismo nodo siguiente, en fila, el proceso no está mapeado: está resumido.
+- **El retrabajo regresa por el carril exterior**, con línea punteada azul, y su etiqueta dice a dónde vuelve.
+- **Una excepción que no se reincorpora es un cierre terminal**, y se dibuja como tal, no como una nota al lado.
+- Cuando el flujo no cabe con aire en una hoja, se corta y se une con el símbolo de conector (A, B, C). El generador lo hace solo.
+Regla: si el diagrama no se puede leer en un teléfono, se parte en dos hojas.
 ## Cómo se mapea una excepción
 Una excepción no se documenta como ruido ni como anécdota: se documenta como una ruta, con cinco cosas:
 1. **El disparador**: qué la provoca, en una frase.

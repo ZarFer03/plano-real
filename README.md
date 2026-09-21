@@ -92,7 +92,7 @@ fuentes/            los registros crudos que dio el cliente
 
 ## El diagrama, y por qué es derivado
 
-El plano se captura **una sola vez** en la tabla de pasos. De ahí salen dos cosas: el diagrama Mermaid que vive dentro de la nota, y el entregable de una página en PDF, con la marca.
+El plano se captura **una sola vez** en dos tablas: los nodos y las rutas entre ellos. De ahí salen dos cosas: el diagrama que vive dentro de la nota, y el entregable paginado, con la marca. Las rutas dicen su tipo, así que un camino de excepción, un retrabajo y un rechazo terminal se dibujan distinto y no se confunden.
 
 El dibujo nunca se edita a mano. Si la tabla cambia y el diagrama no, la auditoría lo marca como vencido y el entregable no se puede cerrar. Así el dibujo no puede mentir.
 
