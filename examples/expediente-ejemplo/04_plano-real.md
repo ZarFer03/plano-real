@@ -13,9 +13,7 @@ Responsables: calidad es dueño del proceso, dirección aprueba, el dueño del p
 Riesgos: documento obsoleto en uso por no retirarlo, cambio crítico sin capacitar, versión sin fecha de revisión
 Mejora: se cuenta el mismo método cada trimestre y se compara contra la línea base
 Casos caminados: caso A, 2026-09-18, con la responsable de calidad. Caso B, 2026-09-19, con dirección.
-
 ## Nodos
-
 | id | texto | forma | quien | sistema | trabajo | espera | evidencia |
 |---|---|---|---|---|---|---|---|
 | n1 | Necesidad de crear o cambiar un documento | inicio | dueño del proceso | correo | 5 min | 1 d | [dicho] "casi siempre lo piden por correo o por WhatsApp" (calidad, 2026-09-18) |
@@ -35,9 +33,7 @@ Casos caminados: caso A, 2026-09-18, con la responsable de calidad. Caso B, 2026
 | n15 | ¿La revisión anual encontró cambios? | decision | calidad | calendario | 5 min | 0 | [dicho] "la revisión anual casi no se hace" (calidad, 2026-09-18) |
 | n16 | Documento vigente en uso | fin | | | | | [observado] |
 | n17 | Solicitud cerrada sin documento | fin | | | | | sin observar |
-
 ## Rutas
-
 | desde | hacia | etiqueta | tipo |
 |---|---|---|---|
 | n1 | n2 | pide el cambio | normal |
