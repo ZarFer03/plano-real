@@ -6,6 +6,34 @@ Los cambios notables de `/plano-real` se registran aquí. Versionado semántico:
 - **MINOR:** capacidad nueva o mejora de contrato compatible hacia atrás.
 - **PATCH:** correcciones compatibles de comportamiento, documentación o empaquetado.
 
+## 0.3.0
+
+El diagrama se pagina y respira. Adios a las partes amontonadas.
+
+### Impacto
+
+- **Paginacion con conectores.** Cada hoja lleva siete elementos como maximo, con el simbolo de conector (A, B, C) para pasar de una a otra, que es el uso para el que existe. Un proceso de diez pasos sale en dos hojas legibles en lugar de una columna interminable.
+- **Mas aire.** El hueco minimo entre formas pasa de 14 a 22 unidades y las etiquetas de sistema quedan a 14 unidades del borde inferior de su forma, en lugar de 9.
+- **El rombo ya no tira su etiqueta afuera.** La etiqueta de sistema de una decision se dibuja centrada debajo del rombo, con su propio espacio reservado.
+- **La flecha de excepcion arranca con aire:** sale diez unidades a la derecha de la forma, no pegada a su borde.
+- Cada hoja lleva su titulo y, cuando hay mas de una, su numero. En impresion cada hoja empieza en pagina nueva.
+
+### Compatibilidad
+
+- La tabla de pasos no cambia. Cambia el acomodo del dibujo.
+
+### Actualizacion
+
+- Volver a instalar y regenerar.
+
+### Migracion
+
+- Ninguna.
+
+### Entrega
+
+- Verificacion con el ejemplo: dos hojas, cero traslapes, hueco minimo de 22 unidades, cero textos fuera de su caja.
+
 ## 0.2.1
 
 Margenes de texto conservadores, para que ninguna etiqueta toque el borde de su forma.

@@ -15,9 +15,12 @@ h2{font-family:'Montserrat',sans-serif;font-size:10.5pt;font-weight:600;margin:1
 .card{flex:1;border:1.4pt solid var(--line);border-radius:6pt;padding:8pt 10pt;}
 .card b{font-family:'Montserrat',sans-serif;font-size:17pt;display:block;line-height:1.1;}
 .card span{font-size:8.5pt;color:#4B5563;}
+.hoja{margin-top:10pt;break-inside:avoid;page-break-inside:avoid;}
+.hoja + .hoja{break-before:page;page-break-before:always;}
+.hoja h3{font-family:'Montserrat',sans-serif;font-size:9.5pt;font-weight:600;color:#4B5563;text-transform:uppercase;letter-spacing:.6pt;margin-bottom:2pt;}
 .diagrama{width:100%;height:auto;display:block;}
 .nodo{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;fill:#1A1A1A;}
-.mini{font-family:'Inter',sans-serif;font-size:10px;fill:#4B5563;}
+.mini{font-family:'Inter',sans-serif;font-size:10px;fill:#6B7280;}
 .exc{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;fill:#C2410C;}
 .demora{font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;fill:#B45309;}
 .carril{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:600;fill:#374151;text-anchor:end;}
@@ -25,9 +28,9 @@ table{width:100%;border-collapse:collapse;font-size:9pt;}
 th,td{border:1pt solid var(--line);padding:4pt 6pt;text-align:left;vertical-align:top;}
 th{background:#F3F4F6;font-weight:600;}
 .pie{margin-top:14pt;border-top:1pt solid var(--line);padding-top:6pt;font-size:8pt;color:#4B5563;}
-@media print{body{width:100%;padding:26pt;} .no-print{display:none;} .diagrama{max-height:200mm;width:auto;margin:0 auto;}}
+@media print{body{width:100%;padding:26pt;} .no-print{display:none;} .diagrama{max-height:190mm;width:auto;margin:0 auto;}}
 @page{size:letter;margin:0;}
-@media screen{body{width:auto;max-width:100%;padding:22pt 20pt;}}
+@media screen{body{width:auto;max-width:100%;padding:22pt 20pt;} .hoja + .hoja{break-before:auto;page-break-before:auto;}}
 </style></head><body>
 <h1>El plano real de la operación</h1>
 <div class="sub">Taller de flotillas (ejemplo inventado, sin datos de ninguna empresa) · Proceso: Alta y cierre de una orden de servicio · 2, plano real · Simbología: ISO 5807</div>
@@ -39,132 +42,145 @@ th{background:#F3F4F6;font-weight:600;}
 <div class="card"><b>10</b><span>esperas registradas</span></div>
 <div class="card"><b>2</b><span>pasos sin observar</span></div>
 </div>
-<h2>Cómo camina el trabajo</h2>
-<svg viewBox="0 0 1000 1670" xmlns="http://www.w3.org/2000/svg" class="diagrama">
+<div class="hoja"><h3>Cómo camina el trabajo, hoja 1 de 2</h3><svg viewBox="0 0 1000 1308" xmlns="http://www.w3.org/2000/svg" class="diagrama">
 <defs><marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1A1A1A"/></marker><marker id="flechaNaranja" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#C2410C"/></marker></defs>
-<line x1="180" y1="8" x2="180" y2="1662" stroke="#D1D5DB" stroke-width="1.5"/>
-<line x1="0" y1="100.0" x2="180" y2="100.0" stroke="#D1D5DB" stroke-width="1.5"/>
-<text x="168.0" y="167.0" class="carril">jefe de patio</text>
-<line x1="0" y1="234.0" x2="180" y2="234.0" stroke="#D1D5DB" stroke-width="1.5"/>
-<text x="168.0" y="305.0" class="carril">auxiliar administrativ</text>
-<line x1="0" y1="376.0" x2="180" y2="376.0" stroke="#D1D5DB" stroke-width="1.5"/>
-<text x="168.0" y="470.0" class="carril">jefe de patio</text>
-<line x1="0" y1="752.0" x2="180" y2="752.0" stroke="#D1D5DB" stroke-width="1.5"/>
-<text x="168.0" y="823.0" class="carril">mecanico</text>
-<line x1="0" y1="894.0" x2="180" y2="894.0" stroke="#D1D5DB" stroke-width="1.5"/>
-<text x="168.0" y="965.0" class="carril">compras</text>
-<line x1="0" y1="1170.0" x2="180" y2="1170.0" stroke="#D1D5DB" stroke-width="1.5"/>
-<text x="168.0" y="1237.0" class="carril">mecanico</text>
-<line x1="0" y1="1304.0" x2="180" y2="1304.0" stroke="#D1D5DB" stroke-width="1.5"/>
-<text x="168.0" y="1371.0" class="carril">atencion a clientes</text>
-<line x1="0" y1="1438.0" x2="180" y2="1438.0" stroke="#D1D5DB" stroke-width="1.5"/>
-<text x="168.0" y="1509.0" class="carril">administracion</text>
-<path d="M520.0,86.0 L520.0,100.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,146.0 L520.0,164.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,220.0 L520.0,234.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,280.0 L520.0,298.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,362.0 L520.0,376.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,422.0 L520.0,440.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,550.0 L520.0,564.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,610.0 L520.0,628.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,738.0 L520.0,752.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,798.0 L520.0,816.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,880.0 L520.0,894.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,940.0 L520.0,958.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,1022.0 L520.0,1036.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,1082.0 L520.0,1100.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,1156.0 L520.0,1170.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,1216.0 L520.0,1234.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,1290.0 L520.0,1304.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,1350.0 L520.0,1368.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,1424.0 L520.0,1438.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,1484.0 L520.0,1502.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<path d="M520.0,1566.0 L520.0,1580.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
-<rect x="350.0" y="40.0" width="340" height="46" rx="23.0" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="366.0" y="64.0" class="nodo">Inicio del proceso</text>
-<path d="M445.0,100.0 H572.0 A23.0,23.0 0 0 1 572.0,146.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="520.0" y="128.0" class="demora" text-anchor="middle">espera 5 min</text>
-<polygon points="372.0,164.0 690.0,164.0 668.0,220.0 350.0,220.0" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="366.0" y="188.0" class="nodo">Recibe la solicitud de la unidad</text>
-<text x="366.0" y="211.0" class="mini">WhatsApp</text>
-<rect x="770.0" y="153.0" width="200.0" height="63" rx="4" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
-<text x="782.0" y="171.0" class="exc">por dato faltante</text>
-<text x="782.0" y="186.0" class="mini">ruta B: pide el dato al</text>
-<text x="782.0" y="201.0" class="mini">chofer</text>
-<path d="M690.0,192.0 L764.0,184.5" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#flechaNaranja)"/>
-<path d="M445.0,234.0 H572.0 A23.0,23.0 0 0 1 572.0,280.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="520.0" y="262.0" class="demora" text-anchor="middle">espera 4 h</text>
-<path d="M350.0,298.0 H690.0 V348.0 C605.0,370.0 435.0,336.0 350.0,356.0 H350.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="366.0" y="322.0" class="nodo">Captura en la hoja de servicios</text>
-<text x="366.0" y="353.0" class="mini">Excel</text>
-<path d="M445.0,376.0 H572.0 A23.0,23.0 0 0 1 572.0,422.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="520.0" y="404.0" class="demora" text-anchor="middle">espera 1 d</text>
-<polygon points="520.0,440.0 645.0,495.0 520.0,550.0 395.0,495.0" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="520.0" y="494.0" class="nodo" text-anchor="middle">Valida el presupuesto</text>
-<text x="520.0" y="509.0" class="nodo" text-anchor="middle">autorizado</text>
-<text x="411.0" y="541.0" class="mini">Excel</text>
-<rect x="770.0" y="496.0" width="200.0" height="50" rx="4" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
-<text x="782.0" y="514.0" class="exc">por autorizacion</text>
-<text x="782.0" y="529.0" class="mini">ruta D: sube a direccion</text>
-<path d="M645.0,495.0 L764.0,521.0" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#flechaNaranja)"/>
-<path d="M445.0,564.0 H572.0 A23.0,23.0 0 0 1 572.0,610.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="520.0" y="592.0" class="demora" text-anchor="middle">espera 3 h</text>
-<polygon points="520.0,628.0 645.0,683.0 520.0,738.0 395.0,683.0" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="520.0" y="688.0" class="nodo" text-anchor="middle">Asigna unidad y mecanico</text>
-<text x="411.0" y="729.0" class="mini">pizarron</text>
-<rect x="770.0" y="671.0" width="200.0" height="63" rx="4" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
-<text x="782.0" y="689.0" class="exc">por capacidad</text>
-<text x="782.0" y="704.0" class="mini">ruta E: espera unidad</text>
-<text x="782.0" y="719.0" class="mini">libre</text>
-<path d="M645.0,683.0 L764.0,702.5" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#flechaNaranja)"/>
-<path d="M445.0,752.0 H572.0 A23.0,23.0 0 0 1 572.0,798.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="520.0" y="780.0" class="demora" text-anchor="middle">espera 2 h</text>
-<path d="M350.0,816.0 H690.0 V866.0 C605.0,888.0 435.0,854.0 350.0,874.0 H350.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="366.0" y="840.0" class="nodo">Levanta el diagnostico tecnico</text>
-<text x="366.0" y="871.0" class="mini">papel</text>
-<path d="M445.0,894.0 H572.0 A23.0,23.0 0 0 1 572.0,940.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="520.0" y="922.0" class="demora" text-anchor="middle">espera 6 h</text>
-<path d="M350.0,958.0 H690.0 V1008.0 C605.0,1030.0 435.0,996.0 350.0,1016.0 H350.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="366.0" y="982.0" class="nodo">Cotiza refacciones</text>
-<text x="366.0" y="1013.0" class="mini">correo</text>
-<rect x="770.0" y="955.0" width="200.0" height="63" rx="4" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
-<text x="782.0" y="973.0" class="exc">por monto</text>
-<text x="782.0" y="988.0" class="mini">ruta C: arriba de 8 mil</text>
-<text x="782.0" y="1003.0" class="mini">sube a direccion</text>
-<path d="M690.0,990.0 L764.0,986.5" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#flechaNaranja)"/>
-<path d="M445.0,1036.0 H572.0 A23.0,23.0 0 0 1 572.0,1082.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="520.0" y="1064.0" class="demora" text-anchor="middle">espera 2 d</text>
-<polygon points="372.0,1100.0 690.0,1100.0 668.0,1156.0 350.0,1156.0" fill="#F3F4F6" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="6 4"/>
-<text x="366.0" y="1124.0" class="nodo">Solicita refacciones al proveedor</text>
-<text x="366.0" y="1147.0" class="mini">proveedor</text>
-<path d="M445.0,1170.0 H572.0 A23.0,23.0 0 0 1 572.0,1216.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="520.0" y="1198.0" class="demora" text-anchor="middle">espera 1 d</text>
-<rect x="350.0" y="1234.0" width="340" height="56" rx="6" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="366.0" y="1258.0" class="nodo">Ejecuta la reparacion</text>
-<text x="366.0" y="1281.0" class="mini">taller</text>
-<rect x="770.0" y="1223.0" width="200.0" height="63" rx="4" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
-<text x="782.0" y="1241.0" class="exc">por sistema</text>
-<text x="782.0" y="1256.0" class="mini">ruta F: no hay refaccion</text>
-<text x="782.0" y="1271.0" class="mini">alternativa</text>
-<path d="M690.0,1262.0 L764.0,1254.5" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#flechaNaranja)"/>
-<path d="M445.0,1304.0 H572.0 A23.0,23.0 0 0 1 572.0,1350.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="520.0" y="1332.0" class="demora" text-anchor="middle">espera 30 min</text>
-<polygon points="372.0,1368.0 690.0,1368.0 668.0,1424.0 350.0,1424.0" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="366.0" y="1392.0" class="nodo">Avisa al cliente</text>
-<text x="366.0" y="1415.0" class="mini">WhatsApp</text>
-<path d="M445.0,1438.0 H572.0 A23.0,23.0 0 0 1 572.0,1484.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="520.0" y="1466.0" class="demora" text-anchor="middle">espera 5 h</text>
-<path d="M350.0,1511.0 V1557.0 A170.0,9 0 0 0 690.0,1557.0 V1511.0 A170.0,9 0 0 0 350.0,1511.0 Z" fill="#F3F4F6" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="6 4"/>
-<text x="366.0" y="1526.0" class="nodo">Cierra y factura</text>
-<text x="366.0" y="1557.0" class="mini">sistema contable</text>
-<rect x="770.0" y="1499.0" width="200.0" height="63" rx="4" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
-<text x="782.0" y="1517.0" class="exc">por dato faltante</text>
-<text x="782.0" y="1532.0" class="mini">ruta B: pide el dato al</text>
-<text x="782.0" y="1547.0" class="mini">chofer</text>
-<path d="M690.0,1534.0 L764.0,1530.5" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#flechaNaranja)"/>
-<rect x="350.0" y="1580.0" width="340" height="46" rx="23.0" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
-<text x="366.0" y="1604.0" class="nodo">Fin del caso</text>
-</svg>
+<line x1="180" y1="6" x2="180" y2="1302" stroke="#D1D5DB" stroke-width="1.5"/>
+<line x1="0" y1="118.0" x2="180" y2="118.0" stroke="#D1D5DB" stroke-width="1.5"/>
+<text x="168.0" y="203.0" class="carril">jefe de patio</text>
+<line x1="0" y1="280.0" x2="180" y2="280.0" stroke="#D1D5DB" stroke-width="1.5"/>
+<text x="168.0" y="367.0" class="carril">auxiliar administrativ</text>
+<line x1="0" y1="446.0" x2="180" y2="446.0" stroke="#D1D5DB" stroke-width="1.5"/>
+<text x="168.0" y="560.0" class="carril">jefe de patio</text>
+<line x1="0" y1="886.0" x2="180" y2="886.0" stroke="#D1D5DB" stroke-width="1.5"/>
+<text x="168.0" y="973.0" class="carril">mecanico</text>
+<line x1="0" y1="1052.0" x2="180" y2="1052.0" stroke="#D1D5DB" stroke-width="1.5"/>
+<text x="168.0" y="1141.0" class="carril">compras</text>
+<line x1="0" y1="1222.0" x2="180" y2="1222.0" stroke="#D1D5DB" stroke-width="1.5"/>
+<text x="168.0" y="1254.0" class="carril">sigue en la hoja sigui</text>
+<path d="M520.0,92.0 L520.0,118.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,164.0 L520.0,186.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,250.0 L520.0,280.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,326.0 L520.0,348.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,420.0 L520.0,446.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,492.0 L520.0,514.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,618.0 L520.0,666.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,712.0 L520.0,734.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,838.0 L520.0,886.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,932.0 L520.0,954.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,1026.0 L520.0,1052.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,1098.0 L520.0,1120.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,1192.0 L520.0,1222.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<rect x="350.0" y="46.0" width="340" height="46" rx="23.0" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="366.0" y="72.0" class="nodo">Inicio del proceso</text>
+<path d="M445.0,118.0 H572.0 A23.0,23.0 0 0 1 572.0,164.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="520.0" y="146.0" class="demora" text-anchor="middle">espera 5 min</text>
+<polygon points="372.0,186.0 690.0,186.0 668.0,250.0 350.0,250.0" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="366.0" y="212.0" class="nodo">Recibe la solicitud de la unidad</text>
+<text x="366.0" y="236.0" class="mini">WhatsApp</text>
+<rect x="770.0" y="191.0" width="200.0" height="63" rx="4" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="782.0" y="209.0" class="exc">por dato faltante</text>
+<text x="782.0" y="224.0" class="mini">ruta B: pide el dato al</text>
+<text x="782.0" y="239.0" class="mini">chofer</text>
+<path d="M700.0,218.0 L762.0,222.5" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#flechaNaranja)"/>
+<path d="M445.0,280.0 H572.0 A23.0,23.0 0 0 1 572.0,326.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="520.0" y="308.0" class="demora" text-anchor="middle">espera 4 h</text>
+<path d="M350.0,348.0 H690.0 V406.0 C605.0,428.0 435.0,394.0 350.0,414.0 H350.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="366.0" y="374.0" class="nodo">Captura en la hoja de servicios</text>
+<text x="366.0" y="406.0" class="mini">Excel</text>
+<path d="M445.0,446.0 H572.0 A23.0,23.0 0 0 1 572.0,492.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="520.0" y="474.0" class="demora" text-anchor="middle">espera 1 d</text>
+<polygon points="520.0,514.0 645.0,566.0 520.0,618.0 395.0,566.0" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="520.0" y="565.0" class="nodo" text-anchor="middle">Valida el presupuesto</text>
+<text x="520.0" y="580.0" class="nodo" text-anchor="middle">autorizado</text>
+<text x="520.0" y="633.0" class="mini" text-anchor="middle">Excel</text>
+<rect x="770.0" y="572.0" width="200.0" height="50" rx="4" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="782.0" y="590.0" class="exc">por autorizacion</text>
+<text x="782.0" y="605.0" class="mini">ruta D: sube a direccion</text>
+<path d="M655.0,566.0 L762.0,597.0" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#flechaNaranja)"/>
+<path d="M445.0,666.0 H572.0 A23.0,23.0 0 0 1 572.0,712.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="520.0" y="694.0" class="demora" text-anchor="middle">espera 3 h</text>
+<polygon points="520.0,734.0 645.0,786.0 520.0,838.0 395.0,786.0" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="520.0" y="791.0" class="nodo" text-anchor="middle">Asigna unidad y mecanico</text>
+<text x="520.0" y="853.0" class="mini" text-anchor="middle">pizarron</text>
+<rect x="770.0" y="779.0" width="200.0" height="63" rx="4" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="782.0" y="797.0" class="exc">por capacidad</text>
+<text x="782.0" y="812.0" class="mini">ruta E: espera unidad</text>
+<text x="782.0" y="827.0" class="mini">libre</text>
+<path d="M655.0,786.0 L762.0,810.5" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#flechaNaranja)"/>
+<path d="M445.0,886.0 H572.0 A23.0,23.0 0 0 1 572.0,932.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="520.0" y="914.0" class="demora" text-anchor="middle">espera 2 h</text>
+<path d="M350.0,954.0 H690.0 V1012.0 C605.0,1034.0 435.0,1000.0 350.0,1020.0 H350.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="366.0" y="980.0" class="nodo">Levanta el diagnostico tecnico</text>
+<text x="366.0" y="1012.0" class="mini">papel</text>
+<path d="M445.0,1052.0 H572.0 A23.0,23.0 0 0 1 572.0,1098.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="520.0" y="1080.0" class="demora" text-anchor="middle">espera 6 h</text>
+<path d="M350.0,1120.0 H690.0 V1178.0 C605.0,1200.0 435.0,1166.0 350.0,1186.0 H350.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="366.0" y="1146.0" class="nodo">Cotiza refacciones</text>
+<text x="366.0" y="1178.0" class="mini">correo</text>
+<rect x="770.0" y="1133.0" width="200.0" height="63" rx="4" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="782.0" y="1151.0" class="exc">por monto</text>
+<text x="782.0" y="1166.0" class="mini">ruta C: arriba de 8 mil</text>
+<text x="782.0" y="1181.0" class="mini">sube a direccion</text>
+<path d="M700.0,1156.0 L762.0,1164.5" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#flechaNaranja)"/>
+<ellipse cx="520.0" cy="1250.0" rx="28.0" ry="28.0" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="520.0" y="1258.0" class="nodo" text-anchor="middle">A</text>
+</svg></div><div class="hoja"><h3>Cómo camina el trabajo, hoja 2 de 2</h3><svg viewBox="0 0 1000 880" xmlns="http://www.w3.org/2000/svg" class="diagrama">
+<defs><marker id="flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1A1A1A"/></marker><marker id="flechaNaranja" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#C2410C"/></marker></defs>
+<line x1="180" y1="6" x2="180" y2="874" stroke="#D1D5DB" stroke-width="1.5"/>
+<line x1="0" y1="46.0" x2="180" y2="46.0" stroke="#D1D5DB" stroke-width="1.5"/>
+<text x="168.0" y="78.0" class="carril">viene de la hoja anter</text>
+<line x1="0" y1="128.0" x2="180" y2="128.0" stroke="#D1D5DB" stroke-width="1.5"/>
+<text x="168.0" y="211.0" class="carril">compras</text>
+<line x1="0" y1="286.0" x2="180" y2="286.0" stroke="#D1D5DB" stroke-width="1.5"/>
+<text x="168.0" y="371.0" class="carril">mecanico</text>
+<line x1="0" y1="448.0" x2="180" y2="448.0" stroke="#D1D5DB" stroke-width="1.5"/>
+<text x="168.0" y="531.0" class="carril">atencion a clientes</text>
+<line x1="0" y1="606.0" x2="180" y2="606.0" stroke="#D1D5DB" stroke-width="1.5"/>
+<text x="168.0" y="696.0" class="carril">administracion</text>
+<path d="M520.0,102.0 L520.0,128.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,174.0 L520.0,196.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,260.0 L520.0,286.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,332.0 L520.0,354.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,418.0 L520.0,448.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,494.0 L520.0,516.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,580.0 L520.0,606.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,652.0 L520.0,674.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<path d="M520.0,748.0 L520.0,778.0" stroke="#1A1A1A" stroke-width="2" marker-end="url(#flecha)"/>
+<ellipse cx="520.0" cy="74.0" rx="28.0" ry="28.0" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="520.0" y="82.0" class="nodo" text-anchor="middle">A</text>
+<path d="M445.0,128.0 H572.0 A23.0,23.0 0 0 1 572.0,174.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="520.0" y="156.0" class="demora" text-anchor="middle">espera 2 d</text>
+<polygon points="372.0,196.0 690.0,196.0 668.0,260.0 350.0,260.0" fill="#F3F4F6" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="366.0" y="222.0" class="nodo">Solicita refacciones al proveedor</text>
+<text x="366.0" y="246.0" class="mini">proveedor</text>
+<path d="M445.0,286.0 H572.0 A23.0,23.0 0 0 1 572.0,332.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="520.0" y="314.0" class="demora" text-anchor="middle">espera 1 d</text>
+<rect x="350.0" y="354.0" width="340" height="64" rx="6" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="366.0" y="380.0" class="nodo">Ejecuta la reparacion</text>
+<text x="366.0" y="404.0" class="mini">taller</text>
+<rect x="770.0" y="359.0" width="200.0" height="63" rx="4" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="782.0" y="377.0" class="exc">por sistema</text>
+<text x="782.0" y="392.0" class="mini">ruta F: no hay refaccion</text>
+<text x="782.0" y="407.0" class="mini">alternativa</text>
+<path d="M700.0,386.0 L762.0,390.5" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#flechaNaranja)"/>
+<path d="M445.0,448.0 H572.0 A23.0,23.0 0 0 1 572.0,494.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="520.0" y="476.0" class="demora" text-anchor="middle">espera 30 min</text>
+<polygon points="372.0,516.0 690.0,516.0 668.0,580.0 350.0,580.0" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="366.0" y="542.0" class="nodo">Avisa al cliente</text>
+<text x="366.0" y="566.0" class="mini">WhatsApp</text>
+<path d="M445.0,606.0 H572.0 A23.0,23.0 0 0 1 572.0,652.0 H445.0 Z" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="520.0" y="634.0" class="demora" text-anchor="middle">espera 5 h</text>
+<path d="M350.0,683.0 V739.0 A170.0,9 0 0 0 690.0,739.0 V683.0 A170.0,9 0 0 0 350.0,683.0 Z" fill="#F3F4F6" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="366.0" y="700.0" class="nodo">Cierra y factura</text>
+<text x="366.0" y="734.0" class="mini">sistema contable</text>
+<rect x="770.0" y="689.0" width="200.0" height="63" rx="4" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="782.0" y="707.0" class="exc">por dato faltante</text>
+<text x="782.0" y="722.0" class="mini">ruta B: pide el dato al</text>
+<text x="782.0" y="737.0" class="mini">chofer</text>
+<path d="M700.0,711.0 L762.0,720.5" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#flechaNaranja)"/>
+<rect x="350.0" y="778.0" width="340" height="46" rx="23.0" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+<text x="366.0" y="804.0" class="nodo">Fin del caso</text>
+</svg></div>
 <h2>Resumen por símbolo</h2>
 <table><tr><th>Símbolo</th><th>Cantidad</th><th>Tiempo de trabajo</th></tr><tr><td>actividad</td><td>1</td><td>3 h</td></tr>
 <tr><td>base-de-datos</td><td>1</td><td>20 min</td></tr>

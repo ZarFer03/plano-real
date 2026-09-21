@@ -40,7 +40,7 @@ El resumen del cursograma clasico, con la cuenta por tipo de actividad y el tiem
 - **Carril izquierdo: quien lo hace.** Puesto, no nombre de pila. Cuando el dueño cambia, cambia el carril: esa es la lectura de cuantas veces el caso cambia de manos, que es el primer numero del plano.
 - **Columna derecha: las rutas de excepcion.** Cada excepcion sale de su paso con linea punteada hacia una caja con su familia y su ruta. No se dibujan como nota al pie, porque una excepcion es una ruta que alguien atiende, no un comentario.
 - **Certeza visible.** Lo observado, medido o firmado va en linea solida. Lo que solo se dijo, o que nadie vio ejecutar, va en gris punteado. El dibujo nunca afirma mas que la evidencia.
-- **Una sola columna principal.** Si el flujo necesita dos columnas paralelas, son dos procesos y van en dos hojas.
+- **Una sola columna principal, y se pagina.** El diagrama no se estira hasta hacerse ilegible: cuando el proceso no cabe con aire en una hoja, se corta y se une con el simbolo de conector (A, B, C), que es exactamente para lo que existe. El generador corta solo, cada siete elementos por hoja, y numera las hojas.
 
 ## Lo que el generador verifica solo
 - Que no haya dos formas encimadas: si el acomodo produce un traslape, lo reporta y no entrega.
