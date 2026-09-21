@@ -6,6 +6,34 @@ Los cambios notables de `/plano-real` se registran aquí. Versionado semántico:
 - **MINOR:** capacidad nueva o mejora de contrato compatible hacia atrás.
 - **PATCH:** correcciones compatibles de comportamiento, documentación o empaquetado.
 
+## 0.4.0
+
+Ramas con condicion, retrabajo visible y la ficha del proceso que pide ISO 9001.
+
+### Impacto
+
+- **Ramas etiquetadas.** Cada decision puede declarar su `condicion`, que se escribe sobre la ruta que sale del rombo. Antes el rombo abria caminos sin decir con que criterio.
+- **Retrabajo visible.** La columna `regreso` declara a que paso vuelve la excepcion, y la caja lo dice: "vuelve al paso N". Sin eso, una excepcion parecia un callejon sin salida.
+- **La etiqueta de sistema de un rombo queda adentro.** Antes se dibujaba debajo y parecia una etiqueta de la flecha. El espacio de abajo ahora es para la condicion.
+- **Ficha del proceso.** Si la nota declara entradas, salidas, secuencia, criterios, recursos, responsables, riesgos y mejora, el entregable trae una tabla que mapea cada campo al requisito 4.4.1 de ISO 9001:2015, con su letra.
+- Leyenda de rutas en el pie: linea solida camino normal, punteada naranja ruta de excepcion, y "vuelve al paso N" retrabajo.
+
+### Compatibilidad
+
+- Las columnas nuevas son opcionales. Sin `condicion` ni `regreso`, el diagrama se dibuja como antes.
+
+### Actualizacion
+
+- Volver a instalar y regenerar.
+
+### Migracion
+
+- Ninguna.
+
+### Entrega
+
+- Ejemplo regenerado: 6 rutas de excepcion con su condicion, 6 retrabajos declarados, ficha de proceso en ocho campos, cero traslapes.
+
 ## 0.3.0
 
 El diagrama se pagina y respira. Adios a las partes amontonadas.

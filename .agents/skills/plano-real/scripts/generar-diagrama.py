@@ -189,9 +189,11 @@ def dibujar_pagina(els, meta, juego, primera, ultima, letra_antes, letra_siguien
         svg.append(forma_svg(f, x, y, an, h, solida))
         rotulo = wrap(p.get("paso", ""), chars)
         if f == "decision":
-            svg += texto_svg(rotulo, 0, y + h / 2 - 6 * (len(rotulo) - 1) + 5, "nodo", centro=x + an / 2)
+            svg += texto_svg(rotulo, 0, y + h / 2 - 13 - 6 * (len(rotulo) - 1) + 5, "nodo", centro=x + an / 2)
             if p.get("sistema"):
-                svg += texto_svg([p["sistema"][:30]], 0, y + h + 15, "mini", centro=x + an / 2)
+                svg += texto_svg([p["sistema"][:30]], 0, y + h / 2 + 17, "mini", centro=x + an / 2)
+            if p.get("condicion"):
+                svg += texto_svg([wrap(p["condicion"], 26)[0]], 0, y + h + 17, "rama", centro=x + an / 2)
         elif f == "conector":
             svg += texto_svg(rotulo, 0, y + h / 2 + 5, "nodo", centro=x + an / 2)
         else:
@@ -202,12 +204,17 @@ def dibujar_pagina(els, meta, juego, primera, ultima, letra_antes, letra_siguien
         y += h + extra
         if tiene_exc:
             l_exc = wrap(exc, 22) + wrap(p.get("ruta") or "sin ruta declarada", 25)[:2]
+            if p.get("regreso"):
+                l_exc.append("vuelve al paso %s" % p["regreso"])
             alto_exc = 16 + len(l_exc) * 13 + 8
             y_exc = max(y_banda, y - extra - alto_exc + 4)
             svg.append('<rect x="%s" y="%s" width="%s" height="%s" rx="4" fill="#FFF7ED" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4"/>' % (X_EXC, y_exc, ANCHO_EXC, alto_exc))
             svg += texto_svg([l_exc[0]], X_EXC + 12, y_exc + 18, "exc")
             svg += texto_svg(l_exc[1:], X_EXC + 12, y_exc + 33, "mini")
             svg.append('<path d="M%s,%s L%s,%s" stroke="#C2410C" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#flechaNaranja)"/>' % (x + an + 10, y - extra - h / 2, X_EXC - 8, y_exc + alto_exc / 2))
+            if p.get("condicion"):
+                medio = (x + an + 10 + X_EXC - 8) / 2
+                svg += texto_svg([wrap(p["condicion"], 20)[0]], 0, y - extra - h / 2 - 7, "rama", centro=medio)
             bboxes.append((X_EXC, y_exc, ANCHO_EXC, alto_exc, "excepcion"))
             y = max(y, y_exc + alto_exc) + HUECO
         else:
@@ -338,6 +345,7 @@ CSS = (
     ".exc{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;fill:#C2410C;}\n"
     ".demora{font-family:'Inter',sans-serif;font-size:11.5px;font-weight:600;fill:#B45309;}\n"
     ".carril{font-family:'Montserrat',sans-serif;font-size:10.5px;font-weight:600;fill:#374151;text-anchor:end;}\n"
+    ".rama{font-family:'Inter',sans-serif;font-size:10.5px;font-weight:600;fill:#C2410C;}\n"
     "table{width:100%;border-collapse:collapse;font-size:9pt;}\n"
     "th,td{border:1pt solid var(--line);padding:4pt 6pt;text-align:left;vertical-align:top;}\n"
     "th{background:#F3F4F6;font-weight:600;}\n"
@@ -345,6 +353,24 @@ CSS = (
     "@media print{body{width:100%;padding:26pt;} .no-print{display:none;} .diagrama{max-height:190mm;width:auto;margin:0 auto;}}\n"
     "@page{size:letter;margin:0;}\n"
     "@media screen{body{width:auto;max-width:100%;padding:22pt 20pt;} .hoja + .hoja{break-before:auto;page-break-before:auto;}}\n")
+
+
+
+CAMPOS_FICHA = [("entradas", "a", "Entradas requeridas"), ("salidas", "a", "Salidas esperadas"),
+                ("secuencia", "b", "Secuencia e interaccion"), ("criterios", "c", "Criterios y metodos"),
+                ("recursos", "d", "Recursos necesarios"), ("responsables", "e", "Responsabilidades y autoridades"),
+                ("riesgos", "g", "Riesgos y oportunidades"), ("mejora", "h", "Evaluacion y mejora")]
+
+
+def ficha_html(meta):
+    filas = ""
+    for clave, letra, nombre in CAMPOS_FICHA:
+        valor = (meta.get(clave) or "").strip()
+        if valor:
+            filas += "<tr><td><b>%s</b> (%s)</td><td>%s</td></tr>" % (nombre, letra, html.escape(valor))
+    if not filas:
+        return ""
+    return '<h2>Ficha del proceso</h2><table><tr><th>Requisito de ISO 9001:2015, 4.4.1</th><th>Como se cumple aqui</th></tr>%s</table>' % filas
 
 
 def entregable(pasos, meta, juego, por_pagina=7):
@@ -366,6 +392,7 @@ def entregable(pasos, meta, juego, por_pagina=7):
         '<div class="sub">%s · Proceso: %s · %s · Simbología: %s</div>' % (html.escape(meta.get("cliente", "")), html.escape(meta.get("proceso", "")), html.escape(meta.get("fase", "")), simb),
         '<div class="rule"></div>',
         '<div class="hallazgo">%s</div>' % html.escape(meta.get("hallazgo", "Sin hallazgo escrito todavía.")),
+        ficha_html(meta),
         '<div class="contadores">',
         '<div class="card"><b>%d</b><span>pasos</span></div>' % len(pasos),
         '<div class="card"><b>%s</b><span>espera acumulada</span></div>' % bonito(espera_total),
@@ -375,7 +402,7 @@ def entregable(pasos, meta, juego, por_pagina=7):
         "".join(hojas),
         "<h2>Resumen por símbolo</h2>",
         "<table><tr><th>Símbolo</th><th>Cantidad</th><th>Tiempo de trabajo</th></tr>%s</table>" % filas,
-        '<div class="pie">Generado desde la tabla de pasos del expediente, con los símbolos de %s. El diagrama no se edita a mano: si la tabla cambia, se vuelve a generar. Los pasos en gris punteado están sin observar y no sostienen un rediseño todavía.</div>' % simb,
+        '<div class="pie">Generado desde la tabla de pasos del expediente, con los símbolos de %s. El diagrama no se edita a mano: si la tabla cambia, se vuelve a generar. Lectura de rutas: linea solida, camino normal; linea punteada naranja con su condicion escrita, ruta de excepcion; la leyenda vuelve al paso N, retrabajo. Los pasos en gris punteado están sin observar y no sostienen un rediseño todavía.</div>' % simb,
         "</body></html>"])
 
 
@@ -399,7 +426,10 @@ def main():
         print("generar-diagrama: no encontre la tabla de pasos en", nota)
         return 1
     meta = {}
-    for etiqueta, clave in (("Cliente:", "cliente"), ("Proceso:", "proceso"), ("Fase:", "fase"), ("Hallazgo:", "hallazgo")):
+    for etiqueta, clave in (("Cliente:", "cliente"), ("Proceso:", "proceso"), ("Fase:", "fase"), ("Hallazgo:", "hallazgo"),
+                            ("Entradas:", "entradas"), ("Salidas:", "salidas"), ("Secuencia:", "secuencia"),
+                            ("Criterios:", "criterios"), ("Recursos:", "recursos"), ("Responsables:", "responsables"),
+                            ("Riesgos:", "riesgos"), ("Mejora:", "mejora")):
         m = re.search(re.escape(etiqueta) + r"\s*(.+)", texto)
         if m:
             meta[clave] = m.group(1).strip()
