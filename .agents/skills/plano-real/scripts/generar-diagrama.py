@@ -181,7 +181,7 @@ def entregable(pasos, meta):
         "th{background:#F3F4F6;font-weight:600;}\n"
         ".pie{margin-top:14pt;border-top:1pt solid var(--line);padding-top:6pt;font-size:8pt;color:#4B5563;}\n"
         "@media print{body{width:100%;padding:32pt;} .no-print{display:none;}}\n"
-        "@page{size:letter;margin:0;}\n")
+        "@page{size:letter;margin:0;}\n@media screen{body{width:auto;max-width:100%;min-height:auto;padding:22pt 20pt;margin:0 auto;}}\n")
     doc = ["<!DOCTYPE html>", '<html lang="es-MX"><head><meta charset="UTF-8">',
            '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
            "<title>Plano real: %s</title>" % html.escape(meta.get("proceso", "")),
