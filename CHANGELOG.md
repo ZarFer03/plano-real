@@ -6,6 +6,36 @@ Los cambios notables de `/plano-real` se registran aquí. Versionado semántico:
 - **MINOR:** capacidad nueva o mejora de contrato compatible hacia atrás.
 - **PATCH:** correcciones compatibles de comportamiento, documentación o empaquetado.
 
+## 0.6.0
+
+El acomodo lo hace un motor profesional, y el texto deja de salirse de sus formas.
+
+### Impacto
+
+- **Acomodo con ELK (Eclipse Layout Kernel).** El mismo motor de capas de las herramientas de diagramación profesionales. Reparte capas, abre los caminos de cada decisión, junta los que se reincorporan y rutea cada línea esquivando las formas. Se acabó el acomodo a mano.
+- **El dibujo pasa de columna a diagrama.** El ejemplo baja de 1233 x 1836 (aspecto 1.49, una tira vertical) a 1527 x 1338 (aspecto 0.88, una hoja). Cabe en una página apaisada y el texto queda legible.
+- **Causa de raíz del texto amontonado:** el ancho de cada forma se medía antes de agregar el número del paso y antes del renglón de quién, sistema y espera. Ocho textos se salían de su caja. Ahora se mide con el texto completo que se va a dibujar, y el rombo calcula cuánto cabe a la altura donde escribe.
+- **El rombo deja de inflarse.** Su ancho mínimo se multiplicaba dos veces por su factor, así que medía 420 unidades de ancho. Ahora mide lo que necesita su texto.
+- **Las etiquetas de ruta vuelven.** Al integrar el motor se perdían el tipo y la etiqueta de cada ruta, y todas las líneas salían iguales. Ya se recuperan por posición.
+- La página del diagrama se imprime apaisada, con márgenes de 10 mm, para que el texto tenga tamaño.
+
+### Compatibilidad
+
+- Las tablas no cambian. Cambia quién calcula el acomodo.
+- Node es opcional: sin él, se usa el acomodo interno y el script lo avisa.
+
+### Actualizacion
+
+- Volver a instalar y regenerar. La primera corrida instala `elkjs` con npm.
+
+### Migracion
+
+- Ninguna.
+
+### Entrega
+
+- Verificación con el ejemplo: 17 nodos, 20 rutas, 4 decisiones y las 4 con dos o más salidas, 3 retrabajos, 14 de 14 etiquetas colocadas por el motor, 0 formas encimadas, 0 rutas que atraviesan una forma, 0 textos fuera de su forma.
+
 ## 0.5.0
 
 El diagrama deja de ser una columna. Ahora es un grafo con ramas de verdad.

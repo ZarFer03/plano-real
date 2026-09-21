@@ -90,6 +90,13 @@ Un expediente por cliente, y esta es su forma:
 fuentes/            los registros crudos que dio el cliente
 ```
 
+
+### El motor de acomodo
+
+El diagrama no lo acomoda una lista: lo acomoda **ELK** (Eclipse Layout Kernel), el motor de capas que usan las herramientas de diagramación profesionales. Reparte los nodos por capas, abre los caminos de cada decisión, junta los que se reincorporan y rutea cada línea esquivando las formas.
+
+La primera vez que generas, el script instala `elkjs` con `npm install` junto a sí mismo. Si tu equipo no tiene Node, el diagrama se genera igual con el acomodo interno, más apretado, y el script lo avisa. No se rompe nada: solo pierde calidad.
+
 ## El diagrama, y por qué es derivado
 
 El plano se captura **una sola vez** en dos tablas: los nodos y las rutas entre ellos. De ahí salen dos cosas: el diagrama que vive dentro de la nota, y el entregable paginado, con la marca. Las rutas dicen su tipo, así que un camino de excepción, un retrabajo y un rechazo terminal se dibujan distinto y no se confunden.

@@ -32,12 +32,13 @@ Si el expediente ya traía la tabla vieja de pasos, el generador la convierte a 
 3. **Puntos de decisión**: dónde alguien tiene que juzgar algo. Cada uno es un lugar donde el proceso depende de que esa persona esté.
 Estos tres números son los que el cliente entiende de inmediato, más que cualquier diagrama.
 ## El diagrama
-Lo genera `scripts/generar-diagrama.py` desde las dos tablas: un SVG profesional en el entregable, y un bloque Mermaid dentro de la nota como vista editable. El dibujo no se edita a mano; si las tablas cambian y el diagrama no, la auditoría lo marca vencido.
+Lo genera `scripts/generar-diagrama.py` desde las dos tablas: un SVG profesional en el entregable, y un bloque Mermaid dentro de la nota como vista editable. El acomodo lo calcula ELK con `scripts/layout-elk.js`: si falta Node o `elkjs`, cae a un acomodo interno y lo avisa. El dibujo no se edita a mano; si las tablas cambian y el diagrama no, la auditoría lo marca vencido.
 - **Un rombo declara sus salidas.** Un rombo con una sola salida no es una decisión, es un adorno: o tiene dos o más rutas con su etiqueta, o la forma está mal elegida.
 - **Los caminos se ven separarse y volver a juntarse.** Si todas las rutas terminan en el mismo nodo siguiente, en fila, el proceso no está mapeado: está resumido.
 - **El retrabajo regresa por el carril exterior**, con línea punteada azul, y su etiqueta dice a dónde vuelve.
 - **Una excepción que no se reincorpora es un cierre terminal**, y se dibuja como tal, no como una nota al lado.
 - Cuando el flujo no cabe con aire en una hoja, se corta y se une con el símbolo de conector (A, B, C). El generador lo hace solo.
+- **El texto nunca sale de su forma.** La caja se mide con el título ya numerado y con el renglón de quién, sistema y espera. Si el texto no cabe, la caja crece, no se recorta.
 Regla: si el diagrama no se puede leer en un teléfono, se parte en dos hojas.
 ## Cómo se mapea una excepción
 Una excepción no se documenta como ruido ni como anécdota: se documenta como una ruta, con cinco cosas:
