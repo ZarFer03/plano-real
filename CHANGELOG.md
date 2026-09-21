@@ -6,6 +6,32 @@ Los cambios notables de `/plano-real` se registran aquí. Versionado semántico:
 - **MINOR:** capacidad nueva o mejora de contrato compatible hacia atrás.
 - **PATCH:** correcciones compatibles de comportamiento, documentación o empaquetado.
 
+## 0.2.1
+
+Margenes de texto conservadores, para que ninguna etiqueta toque el borde de su forma.
+
+### Impacto
+
+- El ancho de linea de cada simbolo se recorta segun la forma: el paralelogramo y el trapecio pierden ancho por el sesgo, y el rombo solo tiene el centro util.
+- La etiqueta del carril se recorta a 22 caracteres para que no invada el margen izquierdo.
+- Verificacion geometrica agregada: se revisa que ningun texto se salga del lienzo ni de su forma.
+
+### Compatibilidad
+
+- Compatible. Solo cambia el corte de linea de las etiquetas.
+
+### Actualizacion
+
+- Volver a instalar y regenerar el diagrama.
+
+### Migracion
+
+- Ninguna.
+
+### Entrega
+
+- Ejemplo regenerado: 58 textos, ninguno fuera de su caja, cero traslapes.
+
 ## 0.2.0
 
 El diagrama pasa a los simbolos de ISO 5807 y se dibuja en vertical, como se lee un flujograma.

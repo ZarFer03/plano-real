@@ -17,11 +17,11 @@ import sys
 INICIO, FIN = "<!-- diagrama:inicio -->", "<!-- diagrama:fin -->"
 SOLIDA = {"observado", "medido", "firmado"}
 FORMAS = {
-    "inicio": (46, 30), "fin": (46, 30), "actividad": (56, 44), "documento": (64, 44),
-    "datos": (56, 44), "entrada-manual": (60, 40), "demora": (46, 20), "base-de-datos": (64, 40),
-    "almacenamiento": (60, 34), "preparacion": (56, 38), "subproceso": (56, 42),
-    "conector": (60, 10), "decision": (110, 26), "operacion": (86, 22), "inspeccion": (86, 22),
-    "transporte": (56, 36),
+    "inicio": (46, 30), "fin": (46, 30), "actividad": (56, 38), "documento": (64, 38),
+    "datos": (56, 36), "entrada-manual": (60, 34), "demora": (46, 20), "base-de-datos": (64, 34),
+    "almacenamiento": (60, 32), "preparacion": (56, 34), "subproceso": (56, 36),
+    "conector": (60, 10), "decision": (110, 24), "operacion": (86, 20), "inspeccion": (86, 20),
+    "transporte": (56, 30),
 }
 ANCHO_NODO, ANCHO_DEC, ANCHO_ESPERA = 340, 250, 150
 X_CARRIL, X_MAIN, X_EXC = 180.0, 350.0, 770.0
@@ -196,7 +196,7 @@ def dibujar(pasos, meta, juego="iso5807"):
     for y0, y1, quien in carriles:
         if quien and quien != anterior:
             out.append('<line x1="0" y1="%s" x2="%g" y2="%s" stroke="#D1D5DB" stroke-width="1.5"/>' % (y0, X_CARRIL, y0))
-            out.append('<text x="%s" y="%s" class="carril">%s</text>' % (X_CARRIL - 12, (y0 + y1) / 2, html.escape(quien[:26])))
+            out.append('<text x="%s" y="%s" class="carril">%s</text>' % (X_CARRIL - 12, (y0 + y1) / 2, html.escape(quien[:22])))
             anterior = quien
     centros = [(b[0] + b[2] / 2, b[1], b[3]) for b in bboxes if b[4] != "excepcion"]
     for (cx1, y1, h1), (cx2, y2, h2) in zip(centros, centros[1:]):
