@@ -6,6 +6,30 @@ Los cambios notables de `/plano-real` se registran aquí. Versionado semántico:
 - **MINOR:** capacidad nueva o mejora de contrato compatible hacia atrás.
 - **PATCH:** correcciones compatibles de comportamiento, documentación o empaquetado.
 
+## Sin publicar
+
+### Conducción y evidencia
+
+- Guía principal de ejecución: localizar/reanudar, precisar decisión, ejecutar fase, verificar y archivar con siguiente movimiento.
+- Fases con entrada, pasos, condiciones de término, manejo de evidencia faltante y entrega uniforme; contrato canónico dentro de la skill.
+- Evidencia y aprobación independientes. Nuevo recibo `[aprobado]` ligado a versión y fuente local; `[firmado]` histórico genera aviso y no eleva evidencia.
+- Auditor con fase obligatoria de 0 a 5, archivos acumulados, entrevistas desde fase 1 y validación estructural de recibos. Estilo produce avisos, no errores de evidencia.
+- El diagrama clasifica por etiqueta inicial; firmas y frases como «no observado» no producen certeza visual.
+- Rediseño sin cuotas de eliminación: evaluación de riesgo, autorización y reversión.
+
+### Migración y límites
+
+- Cambio incompatible de invocación y aceptación: declarar `--fase N`, completar recibos desde fuentes reales y revisar aprobaciones históricas sin inventar datos.
+- El ejemplo existente conserva recibos incompletos y sigue siendo una demostración de diagramación, no un expediente aprobado.
+- El auditor no autentica firmas, no recalcula fórmulas ni verifica todas las compuertas metodológicas. Las pruebas estructurales no sustituyen un caso real.
+- La alineación de `AGENTS.md` está pendiente de permiso de edición. No publicar esta revisión como versión terminada hasta resolverla y completar revisión.
+- Se conserva la versión de manifiestos 0.6.1 hasta cerrar integración y decidir la versión incompatible con su guía de migración. Esta entrada no es una release.
+
+### Verificación local
+
+- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v`: 14 pruebas.
+- `git diff --check` y verificación de vigencia del diagrama de ejemplo.
+
 ## 0.6.1
 
 Se corrige el amontonamiento interno del texto.

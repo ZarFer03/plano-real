@@ -24,7 +24,7 @@ import subprocess
 import sys
 
 INICIO, FIN = "<!-- diagrama:inicio -->", "<!-- diagrama:fin -->"
-SOLIDA = {"observado", "medido", "firmado"}
+SOLIDA = {"observado", "medido"}
 LETRAS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 DIR_ELK = pathlib.Path(__file__).resolve().parent / "layout-elk.js"
 
@@ -114,11 +114,9 @@ def bonito(m):
 
 
 def clase_evidencia(c):
-    c = (c or "").lower()
-    for k in ("observado", "medido", "firmado"):
-        if k in c:
-            return k
-    return "dicho" if "dicho" in c else "sin observar"
+    # Solo la etiqueta inicial declara evidencia; una palabra en la cita no la promueve.
+    marca = re.match(r"\s*\[(dicho|observado|medido)\]", c or "", re.I)
+    return marca.group(1).lower() if marca else "sin observar"
 
 
 def resolver_forma(fila, juego):
