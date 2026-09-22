@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Compuerta de archivo del expediente de operaciones.
-Uso: python3 auditar-expediente.py <ruta del expediente> [--fase N]
+Uso: python3 auditar-expediente.py <ruta del expediente> --fase N
 Sale con codigo 1 si hay fallas. Solo libreria estandar."""
 import pathlib, re, subprocess, sys, collections
 
@@ -13,22 +13,50 @@ REQUERIDOS = {
     5: ["09_custodia.md"],
 }
 ENTREGABLES = {"04_plano-real.md", "05_linea-base.md", "06_prioridad.md", "07_rediseno.md", "08_prueba.md", "09_custodia.md"}
-CLASES = ["dicho", "observado", "medido", "firmado"]
+CLASES = ["dicho", "observado", "medido"]
+
+
+def recibo_valido(clase, texto, documento, raiz):
+    """Valida estructura, no veracidad. Fuentes locales relativas al documento."""
+    import datetime
+    fechas = re.findall(r"\b\d{4}-\d{2}-\d{2}\b", texto)
+    if clase != "medido":
+        if not fechas:
+            return False
+        try:
+            for fecha in fechas:
+                datetime.date.fromisoformat(fecha)
+        except ValueError:
+            return False
+    if clase == "observado":
+        return bool(re.search(r"\bcaso\s+[^\s,|]+.*\bcon\s+[^,|]+,?\s+el\s+\d{4}-\d{2}-\d{2}", texto))
+    if clase == "firmado":
+        return bool(re.search(r"\S.+ revisado por \S.+ el \d{4}-\d{2}-\d{2}", texto))
+    if clase == "dicho":
+        return bool(re.search(r'["“].+?["”]\s*\([^,()]+,\s*[^,()]+,\s*\d{4}-\d{2}-\d{2},\s*[^,()]+\)', texto))
+    fuente = re.search(r"\(fuente:\s*([^()]+)\)", texto)
+    if not fuente:
+        return False
+    if clase == "aprobado":
+        if not re.fullmatch(r"\S.* versi[oó]n \S+ aprobado por \S.* el \d{4}-\d{2}-\d{2} \(fuente: [^()]+\)", texto):
+            return False
+    elif not re.search(r"\S.+ con m[ée]todo \S.+:\s*\S.+?=\s*\S", texto):
+        return False
+    fuente_path = pathlib.Path(fuente.group(1).strip().strip("`"))
+    if fuente_path.is_absolute():
+        return False
+    ruta = (documento.parent / fuente_path).resolve()
+    return ruta.is_relative_to(raiz) and ruta.is_file()
 
 
 def main():
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    if not args:
-        print("Uso: python3 auditar-expediente.py <ruta del expediente> [--fase N]")
-        return 2
-    raiz = pathlib.Path(args[0]).expanduser().resolve()
-    fase = None
-    if "--fase" in sys.argv:
-        try:
-            fase = int(sys.argv[sys.argv.index("--fase") + 1])
-        except (IndexError, ValueError):
-            print("auditar-expediente: --fase necesita un numero de 0 a 5")
-            return 2
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("expediente")
+    parser.add_argument("--fase", type=int, choices=range(6), required=True)
+    args = parser.parse_args()
+    raiz = pathlib.Path(args.expediente).expanduser().resolve()
+    fase = args.fase
     if not raiz.is_dir():
         print("auditar-expediente: no existe el expediente", raiz)
         return 2
@@ -43,12 +71,12 @@ def main():
     conteo = {c: 0 for c in CLASES}
 
     # 1) archivos requeridos por fase
-    if fase is not None and fase in REQUERIDOS:
-        for req in REQUERIDOS[fase]:
-            if not (raiz / req).exists():
-                fallas["archivo_faltante"].append(f"{req} (fase {fase})")
-    if (raiz / "03_entrevistas").is_dir() and not list((raiz / "03_entrevistas").glob("*.md")):
-        fallas["entrevistas_vacias"].append("03_entrevistas/ no tiene ninguna nota")
+    requeridos = sorted({req for n in range(fase + 1) for req in REQUERIDOS[n]})
+    for req in requeridos:
+        if not (raiz / req).is_file():
+            fallas["archivo_faltante"].append(f"{req} (hasta fase {fase})")
+    if fase >= 1 and not any((raiz / "03_entrevistas").glob("*.md")):
+        fallas["entrevistas_vacias"].append("03_entrevistas/ requiere al menos una nota")
 
     # 2) enlaces rotos, lineas en blanco y guiones largos
     for p in notas:
@@ -65,17 +93,23 @@ def main():
                 dentro = not dentro
                 continue
             if not dentro and linea.strip() == "":
-                fallas["linea_en_blanco"].append(f"{rel}:{i}")
+                avisos["linea_en_blanco"].append(f"{rel}:{i}")
             if "\u2014" in linea or "\u2013" in linea:
-                fallas["guion_largo"].append(f"{rel}:{i}")
-        # 3) clases de evidencia, y dicho sin recibo
-        for c in CLASES:
-            encontrados = t.count(f"[{c}]")
-            conteo[c] += encontrados
-            if c == "dicho":
-                for linea in t.split("\n"):
-                    if "[dicho]" in linea and "(" not in linea:
-                        fallas["dicho_sin_recibo"].append(f"{rel}: {linea.strip()[:80]}")
+                avisos["guion_largo"].append(f"{rel}:{i}")
+        # 3) cada etiqueta necesita su propio recibo en la misma celda/linea.
+        for i, linea in enumerate(t.splitlines(), 1):
+            for celda in linea.split("|"):
+                marcas = list(re.finditer(r"\[(dicho|observado|medido|firmado|aprobado)\]", celda))
+                for j, marca in enumerate(marcas):
+                    c = marca.group(1)
+                    if c in conteo:
+                        conteo[c] += 1
+                    elif c == "firmado":
+                        avisos["firma_legacy"].append(f"{rel}:{i}: firma histórica, no evidencia ni autorización vigente; migrar con recibo")
+                    fin = marcas[j + 1].start() if j + 1 < len(marcas) else len(celda)
+                    recibo = celda[marca.end():fin].strip()
+                    if not recibo_valido(c, recibo, p, raiz):
+                        fallas["recibo_invalido"].append(f"{rel}:{i}: [{c}] requiere campos completos y fuente local para medido")
         # 4) entregable sin evidencia observada ni medida
         if p.name in ENTREGABLES and not (t.count("[observado]") or t.count("[medido]")):
             fallas["entregable_sin_evidencia"].append(f"{rel} no cita ninguna observacion ni medicion")

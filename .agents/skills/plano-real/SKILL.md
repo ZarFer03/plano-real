@@ -1,64 +1,86 @@
 ---
 name: plano-real
-description: Use when running a client operations diagnosis.
+description: Diagnostica y rediseña operaciones con evidencia.
 ---
-# Plano Real, el sistema de entrega
-Este sistema conduce el trabajo de un diagnóstico: entender la operación real de una empresa, levantarla con evidencia, medirla, decidir qué construir primero, rediseñar, probar y sostener. No es marketing y no compite con las skills de contenido: aquéllas escriben lo que se publica, ésta conduce lo que se entrega.
-El trabajo se conduce por fases con compuertas. **Si se salta una fase, el sistema no produce el artefacto: pregunta lo que falta.** Producir un plano sin casos reales caminados es inventar, y eso es exactamente lo que este cliente está pagando para que no pase.
-## Cómo se usa, en una línea
-El router de abajo elige la fase según lo que el usuario pida y lo que el expediente ya tenga. Cada fase vive en un archivo de `references/`. Leer ese archivo antes de trabajar: escribirlo de memoria produce artefactos genéricos.
-| Lo que se pide | Fase | Archivo |
+# Plano Real: del caso real al cambio comprobado
+Conduce un diagnóstico operativo: entender cómo se trabaja, medir, elegir un primer movimiento, rediseñar, probar y sostener. No sustituye la observación por una conversación ni convierte una firma en evidencia.
+## Cuándo usar
+- Entender cómo se ejecuta un proceso, dónde espera o de quién depende.
+- Levantar casos, entrevistar a la operación o representar excepciones.
+- Decidir qué simplificar antes de comprar software o automatizar.
+- Retomar un diagnóstico y comprobar qué falta para avanzar.
+- Verificar si un cambio mejoró la operación frente a su línea base.
+No usar para contenido comercial, fijar precios, inventar el proceso ideal o presentar una opinión como diagnóstico aprobado.
+## Mapa del ciclo
+```text
+Localizar expediente y decisión
+              |
+Arranque → Casos y entrevistas → Plano → Medición y prioridad
+                                               |
+                         Rediseño aprobado → Prueba → Custodia
+              |
+En cada intervención: verificar → archivar → entregar siguiente paso
+```
+Las rutas `references/` y `scripts/` se resuelven desde la carpeta que contiene este SKILL.md, no desde la carpeta del cliente. Antes de actuar, leer [el contrato](references/00-convenciones.md). Las fases mantienen sus compuertas; el avance independiente no autoriza cerrar el expediente completo.
+## Paso 0: Localizar y evaluar el expediente
+1. Resolver cliente, proceso y ruta absoluta. Buscar un expediente existente antes de crear otro. Si el destino es ambiguo, preguntar cuál; no escribir en una carpeta supuesta.
+2. En una reanudación, leer `00_AGENT_BRIEF.md`, el alcance y los archivos de la fase solicitada. Comprobar lo que afirman contra sus fuentes, pendientes y aprobaciones; no confiar solo en el brief.
+3. Clasificar la entrada: **nuevo** (preparar arranque), **retomable** (continuar desde evidencia existente), **incompleto** (recuperar el requisito faltante), o **destino incorrecto** (detener escritura y resolver ruta).
+4. Comprobar permisos y accesos necesarios para el siguiente paso. Para ejecutar los scripts, comprobar Python 3.11 o superior. Para diagramar, revisar Node y ELK; si no están, declarar el acomodo interno y sus límites.
+**Termina cuando:** cliente, proceso, destino y estado del expediente están identificados; están disponibles los insumos del siguiente paso o existe un bloqueo concreto. No entrevistar sin alcance y permisos.
+## Paso 1: Precisar la decisión y el alcance
+1. Expresar la decisión que el trabajo debe permitir en una frase: qué necesita decidir el cliente y sobre qué proceso.
+2. Buscar objetivo, límites y aprobaciones existentes. No volver a preguntar lo ya confirmado; confirmar solo cambios, ambigüedades o decisiones nuevas.
+3. Nombrar el artefacto a actualizar y el criterio observable de esta intervención. Si se piden trabajos distintos, separarlos y elegir el primero según dependencias.
+4. Distinguir hechos por recuperar de decisiones por preguntar. No proponer cantidades, fechas, volúmenes ni causas sin recibo. En entrevista, una pregunta por turno, con hipótesis explícita que pueda corregirse.
+**Termina cuando:** la decisión y el alcance constan en el expediente o fueron confirmados, y está definido qué resultado se producirá. Un dato faltante se registra, no se inventa.
+## Paso 2: Ejecutar la fase correspondiente
+Elegir por la petición **y los requisitos comprobados**, no por el nombre del archivo más avanzado. Leer la referencia completa antes de trabajar. En cada fase seguir objetivo, entrada, pasos, manejo de vacíos, archivos, cierre y entrega.
+| Trabajo | Fase | Referencia |
 |---|---|---|
-| Arrancar con un cliente, alcance, quién es quién, accesos, calendario | 0 | `references/00-convenciones.md` y `references/01-arranque-y-entrevistas.md` |
-| Entrevistar gente de la operación, armar el cuestionario, entender el trabajo | 1 | `references/01-arranque-y-entrevistas.md` |
-| Levantar el plano real, mapear el flujo con sus excepciones | 2 | `references/02-plano-real.md` |
-| Medir, línea base, contar pasos, esperas, horas manuales | 3 | `references/03-medicion-y-prioridad.md` |
-| Decidir qué construir primero, priorizar con criterio a la vista | 3 | `references/03-medicion-y-prioridad.md` |
-| Rediseñar, borrar, simplificar, conectar, automatizar | 4 | `references/04-rediseno-y-prueba.md` |
-| Construir y probar contra la línea base | 4 | `references/04-rediseno-y-prueba.md` |
-| Sostener, adopción, custodia, comparar contra el punto de partida | 5 | `references/05-sostener.md` |
-| Generar el diagrama del plano y el entregable de una pagina | 2 y 3 | `scripts/generar-diagrama.py` |
-| Auditar el expediente antes de entregar | todas | `scripts/auditar-expediente.py` |
-## Las cinco leyes, y son duras
-1. **Nada entra como hecho sin recibo.** Toda afirmación sobre la operación del cliente es de una de cuatro clases: `dicho` (alguien lo dijo, con quién y cuándo, sin verificar), `observado` (se caminó el caso completo, con quién), `medido` (se contó con método declarado y su fórmula), o `firmado` (el cliente revisó y aprobó). Nada más entra a un entregable.
-2. **No se automatiza lo que no se entiende, y no se rediseña lo que no se observó.** Un paso del proceso no se puede borrar ni automatizar si su estado es `dicho`. Primero se camina el caso.
-3. **Hechos se buscan, decisiones se preguntan.** Todo lo que se pueda averiguar en un archivo, un sistema o un registro, se busca antes de preguntarlo. A la gente solo se le pregunta lo que solo ella sabe.
-4. **Una pregunta por turno, y cada pregunta con una hipótesis.** Nunca un cuestionario en bloque, nunca un interrogatorio en frío. Se propone una hipótesis y la persona corrige, que es más rápido y más honesto que pedirle que redacte.
-5. **Nunca afirmar antes de preguntar.** Ninguna cantidad, fecha, duración, costo, volumen ni motivo causal se escribe en prosa antes de preguntarlo o de citar el recibo que lo sostiene. Un número puesto primero y confirmado después es el error exacto que esta ley existe para evitar.
-## La forma de negarse
-Cuando falta una fase, se dice en una frase qué falta y se hace la primera pregunta que falta. Una frase de por qué, cero sermón. La persona debe sentir que la están entrevistando, nunca que la están regañando.
-Ejemplo: "Todavía no puedo levantar el plano: no hay casos reales elegidos. ¿Cuál fue el último caso que atendieron de este tipo, el de la semana pasada?"
-## Compuertas entre fases
-| Para... | Hace falta antes |
+| Acordar alcance, permisos, responsables y calendario | 0 | [Arranque y entrevistas](references/01-arranque-y-entrevistas.md) |
+| Entrevistar y caminar casos reales | 1 | [Arranque y entrevistas](references/01-arranque-y-entrevistas.md) |
+| Mapear pasos, rutas, excepciones y contadores | 2 | [Plano real](references/02-plano-real.md) |
+| Medir y elegir un primer movimiento | 3 | [Medición y prioridad](references/03-medicion-y-prioridad.md) |
+| Rediseñar, conseguir aprobación y probar | 4 | [Rediseño y prueba](references/04-rediseno-y-prueba.md) |
+| Comprobar uso, sostener y aprender | 5 | [Custodia](references/05-sostener.md) |
+Conservar las tres clases de evidencia y la aprobación independiente definidas en el contrato. No rediseñar lo no observado. Si falta un requisito, nombrarlo en una frase y pedir el primer dato faltante; solo continuar otro tramo si su independencia está documentada.
+**Termina cuando:** los pasos de la intervención produjeron el artefacto con sus recibos, o un borrador delimitado identifica lo que falta, quién lo aporta y qué decisión bloquea. Un borrador no significa fase terminada.
+## Paso 3: Verificar el resultado
+1. Revisar la lista «Termina cuando» de la fase, no solo que exista el archivo.
+2. Verificar que las fuentes sostienen cada afirmación, que los cálculos son reproducibles y que la aprobación corresponde a la versión. Son revisiones humanas que el script no sustituye.
+3. Si cambian las tablas del plano, regenerar con [generar-diagrama.py](scripts/generar-diagrama.py); no editar el dibujo a mano. Revisar vigencia y legibilidad.
+4. Leer [los controles y límites del auditor](references/07-auditoria.md). Desde la carpeta de la skill, ejecutar `python3 scripts/auditar-expediente.py "/ruta/absoluta/del/expediente" --fase N`, con la fase real de cierre. Corregir fallas y repetir; no bajar la fase para ocultarlas.
+**Termina cuando:** para un cierre, las compuertas metodológicas están cumplidas y la auditoría sale en cero. Si no, informar «borrador» o «bloqueado» con el motivo exacto, sin anunciar aprobación o mejora.
+## Paso 4: Archivar y entregar
+1. Actualizar los documentos existentes preservando trazabilidad y registrando qué versión sustituyen. Guardar evidencia cruda en `fuentes/`, sin mezclarla con contenido publicable.
+2. Actualizar `00_AGENT_BRIEF.md`: decisión, fase, archivos vigentes, evidencia, pendientes con responsable, bloqueos y siguiente acción. Si cambió después de auditar, repetir la auditoría sobre el estado final. Reservar ese último ciclo antes de terminar: guardar comando, fase, código de salida y limitaciones en un registro de verificación fuera de la carpeta auditada, dentro del espacio privado autorizado del cliente y nunca en un repositorio público, para no volver a modificar lo auditado. Si se agota el presupuesto antes de verificar, declarar entrega incompleta, no cierre.
+3. Entregar en el chat un resumen breve, no todo el expediente:
+   - **Resultado:** qué quedó establecido y si es borrador, revisión o cierre.
+   - **Sustento:** evidencia principal y su limitación.
+   - **Archivo:** ubicación del artefacto actualizado.
+   - **Pendiente:** qué falta, quién lo aporta y qué decisión bloquea.
+   - **Siguiente movimiento:** una acción concreta, sin ejecutarla si requiere permiso.
+**Termina cuando:** los archivos y el brief reflejan lo realmente hecho, el resultado de verificación está registrado y el usuario puede retomar el trabajo desde el siguiente movimiento.
+## Límites y errores que evitar
+- No prometer resultados, inventar cifras ni asumir permisos por tener acceso técnico.
+- No cerrar con etiquetas vacías, aprobaciones de otra versión o un auditor verde como única prueba.
+- No confundir evidencia con aprobación ni borrador con autorización para ejecutar.
+- No volver a entrevistar desde cero si el expediente ya contiene la respuesta.
+- No cambiar alcance, construir sin aprobación ni eliminar controles para cumplir una cuota.
+- No sacar datos del cliente del expediente ni usarlos públicamente sin permiso escrito.
+- No sustituir una visita o una prueba real por una simulación no declarada.
+## Mapa de archivos del expediente
+| Archivo | Función |
 |---|---|
-| Entrevistar | Alcance firmado: proceso elegido, quién es quién, permiso del cliente y de la gente |
-| Mapear el plano | Casos reales elegidos y al menos uno caminado de punta a punta |
-| Medir la línea base | Plano v1 caminado, no dibujado de memoria |
-| Priorizar | Línea base contada, con su método declarado |
-| Rediseñar | Prioridad con criterio a la vista |
-| Construir | Rediseño aprobado por el cliente, por escrito |
-| Sostener | Comparación contra la línea base, con el mismo método |
-## El expediente, que es donde vive todo
-Un expediente por cliente, en `/home/zarfer-dw/proyectos/clients/<cliente>/`, con la convención de nombres que ya existe en los proyectos del sistema:
-`00_AGENT_BRIEF.md` el brief para cualquier agente que entre, con lo confirmado, lo pendiente y cómo razonar.
-`01_alcance.md` proceso elegido, fases, entregables, precio y fechas.
-`02_quien-es-quien.md` puestos, nombres, quién decide, quién ejecuta, quién autoriza, quién se fue y qué se fue con él.
-`03_entrevistas/` una nota por entrevista, con su recibo.
-`04_plano-real.md` el flujo, sus pasos, sus excepciones y su diagrama.
-`05_linea-base.md` lo contado, con su método y su fórmula.
-`06_prioridad.md` el orden de lo que conviene construir primero.
-`07_rediseno.md` el proceso nuevo, con sus excepciones diseñadas.
-`08_prueba.md` qué se probó, con qué casos y contra qué número.
-`09_custodia.md` adopción, comparación y siguiente ciclo.
-`fuentes/` los registros crudos, exportaciones y evidencias que el cliente dio.
-Frontera de confidencialidad: los datos del cliente no salen del expediente ni del chat, no entran al archivo de contenido, y no se citan cifras de cliente en nada publicable sin permiso por escrito.
-## La compuerta de archivo, obligatoria
-Antes de dar por cerrado cualquier artefacto:
-1. Correr `python3 scripts/auditar-expediente.py <ruta del expediente>`.
-2. Arreglar lo que salga y volver a correrlo. Un entregable no está terminado hasta que sale en cero.
-Comprueba: archivos requeridos presentes, enlaces rotos, clases de evidencia sin recibo, excepciones sin conteo, cantidades sin fuente, el brief desactualizado contra el resto del expediente, y líneas en blanco o guiones largos en los documentos del cliente.
-## Lo que este sistema no hace
-- No promete resultados ni escribe cifras de cliente en material público.
-- No decide el precio ni el alcance comercial: eso lo define quien contrata el trabajo.
-- No sustituye la visita presencial: la recibe como insumo y la registra en `fuentes/`.
-- No inventa reglas de la operación. Si falta un dato, se marca y se pregunta.
+| `00_AGENT_BRIEF.md` | Estado y continuidad para quien retome |
+| `01_alcance.md` | Proceso, entregables, límites, precio y fechas confirmados |
+| `02_quien-es-quien.md` | Quién decide, ejecuta, autoriza y sostiene |
+| `03_entrevistas/` | Notas con casos, citas, recibos y pendientes |
+| `04_plano-real.md` | Nodos, rutas, excepciones, contadores y diagrama |
+| `05_linea-base.md` | Datos, método, ventana, fuentes y cálculos |
+| `06_prioridad.md` | Criterio y primer movimiento |
+| `07_rediseno.md` | Nuevo proceso y aprobación de versión |
+| `08_prueba.md` | Criterio previo, ejecución, comparación y reversión |
+| `09_custodia.md` | Uso, responsables, incidentes y siguiente ciclo |
+| `fuentes/` | Registros crudos y recibos |

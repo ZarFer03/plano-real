@@ -6,11 +6,15 @@ Una operación no se arregla comprando otra herramienta. Se arregla entendiéndo
 
 ## Qué lo hace distinto
 
-- **No salta fases.** El orden es arranque, entrevistas, plano, medición, prioridad, rediseño, prueba y sostenimiento. Si falta la fase anterior, no produce el artefacto: hace la primera pregunta que falta. Un plano sin casos caminados es una invención.
-- **Nada entra como hecho sin recibo.** Toda afirmación sobre la operación es `dicho`, `observado`, `medido` o `firmado`, y cada clase tiene lo que permite y lo que prohíbe. De ahí sale la ley que sostiene todo: **no se rediseña lo que no se observó**. Un paso que nadie vio ejecutar no se borra ni se automatiza.
+- **No salta fases.** El orden es arranque, entrevistas, plano, medición, prioridad, rediseño, prueba y sostenimiento. Si falta un requisito, bloquea el cierre o la ejecución afectados. Permite borradores y avance independiente delimitado, nunca un cierre completo con pendientes críticos. Un plano sin casos caminados es una invención.
+- **Nada entra como hecho sin recibo.** La evidencia es `dicho`, `observado` o `medido`. La aprobación se registra aparte, ligada a una versión y un recibo; no convierte una declaración en un hecho observado. De ahí sale la ley que sostiene todo: **no se rediseña lo que no se observó**. Un paso que nadie vio ejecutar no se borra ni se automatiza.
 - **Las excepciones son el trabajo real.** Siete familias (dato faltante, autorización, tipo de caso, tiempo, capacidad, sistema y decisión humana), cada una con su disparador, quién la atiende, a dónde desvía, cuántas veces pasa y qué cuesta. Sin conteo, una excepción no puede sostener un rediseño.
 - **Todo queda en tu expediente.** Archivos de markdown en tu propia carpeta, en un formato que puedes leer, versionar y llevarte. Nada vive solo dentro de un chat.
-- **El cierre está condicionado.** Un script audita el expediente antes de dar cualquier entregable por terminado: archivos de la fase, enlaces rotos, evidencia faltante, excepciones sin conteo, números sin fuente. Si no sale en cero, no está terminado.
+- **El cierre está condicionado.** Un script exige fase explícita, archivos de fases previas, enlaces locales válidos y recibos de evidencia completos. Un resultado cero no sustituye la revisión humana de fórmulas, excepciones y fuentes. Consulta los [controles y límites](.agents/skills/plano-real/references/07-auditoria.md).
+
+## Compatibilidad de esta revisión
+
+Los cambios sin publicar requieren `--fase N`, separan evidencia de aprobación y exigen fuentes relativas al documento. Antes de tocar expedientes existentes, seguir la [guía de migración con respaldo y revisión](.agents/skills/plano-real/references/08-migracion.md). Los manifiestos todavía identifican la última versión publicada; este trabajo no instala ni publica una nueva release.
 
 ## Instalar
 

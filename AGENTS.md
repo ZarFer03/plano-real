@@ -21,11 +21,12 @@ Un sistema de trabajo, no una librería de prompts. Conduce el levantamiento, la
 1. Lee `CONVENTIONS.md`.
 2. Lee `SKILL.md` y elige la fase con su tabla de router.
 3. Lee el archivo de `references/` de esa fase antes de trabajar. Escribir de memoria produce artefactos genéricos.
-4. Antes de cerrar cualquier artefacto, corre el script de auditoría y déjalo en cero.
+4. Antes de cerrar una fase, verifica sus compuertas metodológicas y ejecuta `python3 .agents/skills/plano-real/scripts/auditar-expediente.py <ruta absoluta del expediente> --fase N` con la fase real de cierre. Corrige las fallas sin bajar la fase para ocultarlas. Cero no certifica veracidad, autenticidad ni cumplimiento completo: consulta `references/07-auditoria.md` y realiza la revisión humana.
+5. Si falta un requisito, entrega un borrador o declara el bloqueo concreto. Actualiza `00_AGENT_BRIEF.md` con evidencia, pendientes y siguiente acción; si cambió después de auditar, repite la auditoría sobre el estado final.
 
 ## Las cinco leyes, en corto
 
-1. Nada entra como hecho sin recibo: `dicho`, `observado`, `medido` o `firmado`.
+1. Toda afirmación sobre la operación lleva clase y recibo: `dicho`, `observado` o `medido`. La aprobación es independiente y corresponde a una versión concreta con su recibo; `firmado` se conserva solo como registro histórico, no como evidencia ni autorización nueva.
 2. No se rediseña lo que no se observó.
 3. Hechos se buscan, decisiones se preguntan.
 4. Una pregunta por turno, con hipótesis de trabajo.
