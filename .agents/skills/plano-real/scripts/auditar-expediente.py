@@ -42,7 +42,10 @@ def recibo_valido(clase, texto, documento, raiz):
             return False
     elif not re.search(r"\S.+ con m[ée]todo \S.+:\s*\S.+?=\s*\S", texto):
         return False
-    ruta = (documento.parent / fuente.group(1).strip().strip("`")).resolve()
+    fuente_path = pathlib.Path(fuente.group(1).strip().strip("`"))
+    if fuente_path.is_absolute():
+        return False
+    ruta = (documento.parent / fuente_path).resolve()
     return ruta.is_relative_to(raiz) and ruta.is_file()
 
 

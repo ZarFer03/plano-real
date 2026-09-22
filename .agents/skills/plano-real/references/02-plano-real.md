@@ -17,7 +17,7 @@ El plano no se dibuja en una junta ni se reconstruye de memoria. Se camina:
 5. Marcar cada cambio de manos y cada punto donde alguien decidió algo.
 6. Al terminar, contar los tres números del plano con la persona delante.
 7. Caminar un segundo caso de una variante distinta, aunque sea corto, para ver qué cambia.
-Casos mínimos antes de cerrar el plano: uno del caso frecuente, uno de un cliente o variante distinta, uno con excepción, y uno que haya sido urgente. Si alguno no existe en la ventana, se anota y se dice, no se rellena con lo que se supone.
+Casos mínimos antes de cerrar el plano, dentro del alcance aprobado: uno frecuente, uno de un cliente o variante distinta, uno con excepción y uno urgente cuando aplique. Si una variante está excluida, marcarla `fuera de alcance`; no exigirla como faltante para cerrar el alcance acotado. Si está incluida pero no existe en la ventana, registrar esa limitación sin inventar un caso. Comprobar que la exclusión no oculta riesgos o dependencias del tramo incluido.
 ### El modelo de datos del plano
 El flujo son **dos tablas**, no una lista. Una lista no puede representar un grafo: siempre sale un dibujo lineal aunque el proceso no lo sea.
 

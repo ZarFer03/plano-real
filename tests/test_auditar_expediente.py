@@ -60,6 +60,20 @@ class AuditorTests(unittest.TestCase):
         result = self.run_audit('--fase', '0')
         self.assertEqual(result.returncode, 0, result.stdout)
 
+    def test_receipt_sources_must_be_relative_to_document(self):
+        receipt_file = self.root / 'recibo.txt'
+        receipt_file.write_text('Fixture sintético\n', encoding='utf-8')
+        for kind, prefix in (
+            ('medido', 'tiempo con método suma: 1 + 2 = 3'),
+            ('aprobado', 'alcance versión v1 aprobado por responsable el 2026-09-18'),
+        ):
+            for source, expected in ((str(receipt_file), 1), ('recibo.txt', 0)):
+                with self.subTest(kind=kind, source=source):
+                    (self.root / '01_alcance.md').write_text(
+                        f'[{kind}] {prefix} (fuente: {source})\n', encoding='utf-8')
+                    result = self.run_audit('--fase', '0')
+                    self.assertEqual(result.returncode, expected, result.stdout)
+
     def test_style_is_warning_not_evidence_failure(self):
         (self.root / '01_alcance.md').write_text('# Alcance\n\nTexto — estilo.\n', encoding='utf-8')
         result = self.run_audit('--fase', '0')

@@ -54,7 +54,7 @@ Conservar las tres clases de evidencia y la aprobación independiente definidas 
 **Termina cuando:** para un cierre, las compuertas metodológicas están cumplidas y la auditoría sale en cero. Si no, informar «borrador» o «bloqueado» con el motivo exacto, sin anunciar aprobación o mejora.
 ## Paso 4: Archivar y entregar
 1. Actualizar los documentos existentes preservando trazabilidad y registrando qué versión sustituyen. Guardar evidencia cruda en `fuentes/`, sin mezclarla con contenido publicable.
-2. Actualizar `00_AGENT_BRIEF.md`: decisión, fase, archivos vigentes, evidencia, pendientes con responsable, bloqueos y siguiente acción. Si cambió después de auditar, repetir la auditoría sobre el estado final.
+2. Actualizar `00_AGENT_BRIEF.md`: decisión, fase, archivos vigentes, evidencia, pendientes con responsable, bloqueos y siguiente acción. Si cambió después de auditar, repetir la auditoría sobre el estado final. Reservar ese último ciclo antes de terminar: guardar comando, fase, código de salida y limitaciones en un registro de verificación fuera de la carpeta auditada, dentro del espacio privado autorizado del cliente y nunca en un repositorio público, para no volver a modificar lo auditado. Si se agota el presupuesto antes de verificar, declarar entrega incompleta, no cierre.
 3. Entregar en el chat un resumen breve, no todo el expediente:
    - **Resultado:** qué quedó establecido y si es borrador, revisión o cierre.
    - **Sustento:** evidencia principal y su limitación.

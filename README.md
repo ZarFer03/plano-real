@@ -12,6 +12,10 @@ Una operación no se arregla comprando otra herramienta. Se arregla entendiéndo
 - **Todo queda en tu expediente.** Archivos de markdown en tu propia carpeta, en un formato que puedes leer, versionar y llevarte. Nada vive solo dentro de un chat.
 - **El cierre está condicionado.** Un script exige fase explícita, archivos de fases previas, enlaces locales válidos y recibos de evidencia completos. Un resultado cero no sustituye la revisión humana de fórmulas, excepciones y fuentes. Consulta los [controles y límites](.agents/skills/plano-real/references/07-auditoria.md).
 
+## Compatibilidad de esta revisión
+
+Los cambios sin publicar requieren `--fase N`, separan evidencia de aprobación y exigen fuentes relativas al documento. Antes de tocar expedientes existentes, seguir la [guía de migración con respaldo y revisión](.agents/skills/plano-real/references/08-migracion.md). Los manifiestos todavía identifican la última versión publicada; este trabajo no instala ni publica una nueva release.
+
 ## Instalar
 
 ### Claude Code

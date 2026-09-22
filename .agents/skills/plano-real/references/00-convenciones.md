@@ -32,7 +32,8 @@ Un paso del proceso no se borra, no se simplifica ni se automatiza si su evidenc
 | Sostener | Comparación válida contra la línea base, o limitación explícita sin afirmar mejora |
 Los estados del documento son `borrador`, `listo para revisión` y `aprobado para ejecutar`. No son clases de evidencia. Un borrador puede mostrar zonas desconocidas marcadas; no puede presentarlas como hechos ni autorizar cambios sobre ellas.
 Un pendiente bloquea la decisión que depende de él. Se puede avanzar en un tramo independiente solo si quedan documentados alcance, dependencias, límites y riesgos compartidos; si afecta seguridad, dinero, cumplimiento o una dependencia del tramo, no es independiente. El cierre de la fase completa sigue exigiendo sus compuertas y la auditoría completa. No existe un modo de auditoría parcial que apruebe todo el expediente.
-Cuando falta un requisito, explicar cuál y pedir el primer dato faltante, sin completar con supuestos.
+Antes de aplicar listas de casos o compuertas, contrastarlas con el alcance aprobado. Marcar cada variante excluida como `fuera de alcance` y no convertirla en un faltante que bloquee este diagnóstico acotado. Una exclusión no elimina riesgos o dependencias del tramo incluido: si aparecen, documentarlos y pedir una decisión de alcance antes de avanzar. No ampliar el alcance por seguir una lista genérica.
+Cuando falta un requisito aplicable, explicar cuál y pedir el primer dato faltante, sin completar con supuestos.
 ## El barrido de excepciones, que es donde se esconde el trabajo real
 Cada paso del plano lleva su columna de excepción. Una excepción no es ruido: es una ruta que existe y que alguien atiende. Las siete familias, con su pregunta de disparo:
 1. **Por dato faltante.** ¿Qué pasa cuando el dato no está o está mal? (el campo vacío, el número mal capturado, el archivo que no llegó)
@@ -51,7 +52,7 @@ Regla de oro: si una excepción no tiene conteo, su estado es `dicho` y no puede
 - Los documentos que van al cliente no llevan líneas en blanco de más ni guiones largos, y los bloques pegables van dentro de cercas de código cuando la superficie necesita líneas en blanco.
 - Un documento nunca se entrega sin haber corrido la compuerta de archivo del sistema con `--fase N`. Leer [07-auditoria.md](07-auditoria.md): formatos verificables, avisos de estilo y revisión humana que el script no sustituye.
 ## Encabezado obligatorio del expediente
-Cada documento del expediente abre con un bloque de cuatro líneas: cliente, proceso, fase, y clase de evidencia dominante. Quien lo lea debe saber en diez segundos qué está viendo y cuánto vale.
+Cada documento del expediente abre con un bloque de cuatro líneas: cliente, proceso, fase, y clase de evidencia dominante. En ese último campo usar `dicho`, `observado` o `medido`; si no se aportó evidencia, escribir `sin evidencia aportada` como estado de ausencia, no como una cuarta clase. La aprobación va en un campo separado: documento, versión y estado. Nunca escribir `aprobado` ni `firmado` como clase, aunque la prosa posterior los distinga. Quien lo lea debe saber en diez segundos qué está viendo y cuánto vale.
 ## Dedupe
 Antes de crear un documento o un caso en el expediente, buscar si ya existe. Si el tema ya vive en otro lado, se actualiza el existente preservando lo anterior con una nota de supersesión y el por qué. Dos verdades vigentes sobre lo mismo es el fracaso que esta regla existe para evitar.
 ## Frontera con el resto de tus herramientas

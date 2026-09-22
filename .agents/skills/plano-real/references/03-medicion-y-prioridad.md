@@ -38,11 +38,11 @@ Reglas de honestidad al priorizar:
 No estimar el costo hora ni completar conteos con memoria. Registrar dato, responsable y decisión bloqueada. Una medición incompleta sigue siendo borrador; una aprobación pendiente se presenta como pendiente, nunca como firma obtenida.
 ## Archivos que produce o actualiza
 `05_linea-base.md` con su tabla, su método y su costo calculado, y `06_prioridad.md` con las cuatro lecturas, el orden y el primer movimiento.
-La línea base se firma con el cliente: es el punto de comparación de todo el proyecto, y sin firma la mejora del mes doce no se puede demostrar. Quien la firma es quien va a discutir el resultado después, y se anota con fecha.
+La línea base se presenta al cliente para aprobación de su versión vigente mediante el recibo `[aprobado]`: documento, versión, responsable, fecha y fuente local relativa al documento. La aprobación acuerda el punto de comparación; no demuestra por sí misma una mejora. Si falta el recibo, registrar a quién se solicitó, cuándo y qué versión está pendiente, sin cerrar la fase. Un `[firmado]` histórico no sustituye la aprobación vigente.
 ## Termina cuando
 - Toda métrica tiene método, ventana y fuente. Cero números huérfanos.
 - El costo del proceso está calculado con la fórmula escrita y el costo hora con fuente.
-- La línea base está firmada, o queda anotado a quién se le propuso y cuándo.
+- La línea base tiene recibo `[aprobado]` de su versión vigente, con documento, versión, responsable, fecha y fuente local; se verificó su correspondencia. Si falta, la aprobación y el cierre de fase siguen pendientes.
 - Hay un solo primer movimiento, con su criterio y su forma de medirse.
 - La auditoría del expediente sale en cero.
 ## Entrega al siguiente paso

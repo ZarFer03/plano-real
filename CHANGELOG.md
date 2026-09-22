@@ -16,6 +16,9 @@ Los cambios notables de `/plano-real` se registran aquí. Versionado semántico:
 - Auditor con fase obligatoria de 0 a 5, archivos acumulados, entrevistas desde fase 1 y validación estructural de recibos. Estilo produce avisos, no errores de evidencia.
 - El diagrama clasifica por etiqueta inicial; firmas y frases como «no observado» no producen certeza visual.
 - Rediseño sin cuotas de eliminación: evaluación de riesgo, autorización y reversión.
+- Cierre de línea base exige recibo `[aprobado]` de su versión vigente; una solicitud pendiente o firma histórica no cierra la fase.
+- Auditor rechaza fuentes absolutas también dentro del expediente; regresiones negativas y positivas para mediciones y aprobaciones.
+- Encabezados separan aprobación de evidencia; las variantes excluidas no se convierten en faltantes del alcance. El cierre reserva auditoría final y registro privado.
 
 ### Migración y límites
 
@@ -23,11 +26,11 @@ Los cambios notables de `/plano-real` se registran aquí. Versionado semántico:
 - El ejemplo existente conserva recibos incompletos y sigue siendo una demostración de diagramación, no un expediente aprobado.
 - El auditor no autentica firmas, no recalcula fórmulas ni verifica todas las compuertas metodológicas. Las pruebas estructurales no sustituyen un caso real.
 - `AGENTS.md` está alineado con el contrato: aprobación separada de evidencia, fase explícita, revisión humana y actualización del brief. La publicación sigue requiriendo cerrar la revisión y validar la conducción con un caso real autorizado.
-- Se conserva la versión de manifiestos 0.6.1 hasta cerrar integración y decidir la versión incompatible con su guía de migración. Esta entrada no es una release.
+- Se conserva la versión de manifiestos 0.6.1; la futura publicación requiere autorización y una versión incompatible según la política MAJOR del proyecto. La [guía de migración](.agents/skills/plano-real/references/08-migracion.md) ya documenta respaldo, recibos, compatibilidad y reversión. Esta entrada no es una release.
 
 ### Verificación local
 
-- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v`: 14 pruebas.
+- `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests -v`: 16 pruebas. Las nuevas regresiones se observaron fallar antes de la corrección.
 - `git diff --check` y verificación de vigencia del diagrama de ejemplo.
 
 ## 0.6.1

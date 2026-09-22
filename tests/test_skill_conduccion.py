@@ -38,6 +38,13 @@ class ConduccionTests(unittest.TestCase):
                     '## Si falta evidencia', '## Archivos que produce o actualiza',
                     '## Termina cuando', '## Entrega al siguiente paso'])
 
+    def test_baseline_closure_requires_current_approval(self):
+        text = (SKILL / 'references/03-medicion-y-prioridad.md').read_text()
+        closure = text.split('## Termina cuando\n', 1)[1].split('## Entrega', 1)[0]
+        self.assertIn('[aprobado]', closure)
+        self.assertIn('versión vigente', closure)
+        self.assertNotIn('o queda anotado', closure)
+
     def test_local_markdown_links_resolve(self):
         files = [SKILL / 'SKILL.md'] + list((SKILL / 'references').glob('*.md'))
         for path in files:
