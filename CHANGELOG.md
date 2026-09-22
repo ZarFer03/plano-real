@@ -22,7 +22,7 @@ Los cambios notables de `/plano-real` se registran aquí. Versionado semántico:
 - Cambio incompatible de invocación y aceptación: declarar `--fase N`, completar recibos desde fuentes reales y revisar aprobaciones históricas sin inventar datos.
 - El ejemplo existente conserva recibos incompletos y sigue siendo una demostración de diagramación, no un expediente aprobado.
 - El auditor no autentica firmas, no recalcula fórmulas ni verifica todas las compuertas metodológicas. Las pruebas estructurales no sustituyen un caso real.
-- La alineación de `AGENTS.md` está pendiente de permiso de edición. No publicar esta revisión como versión terminada hasta resolverla y completar revisión.
+- `AGENTS.md` está alineado con el contrato: aprobación separada de evidencia, fase explícita, revisión humana y actualización del brief. La publicación sigue requiriendo cerrar la revisión y validar la conducción con un caso real autorizado.
 - Se conserva la versión de manifiestos 0.6.1 hasta cerrar integración y decidir la versión incompatible con su guía de migración. Esta entrada no es una release.
 
 ### Verificación local
