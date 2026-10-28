@@ -66,6 +66,14 @@ class LayoutTextTests(unittest.TestCase):
         self.assertEqual(gen.problemas_texto(self.nodos, self.ac, "iso5807"), [])
         self.assertEqual(gen.problemas_etiquetas(self.ac), [])
 
+    def test_approval_cannot_make_a_node_verified(self):
+        for receipt in ('[firmado] plano revisado por responsable', '[aprobado] plano',
+                        '[dicho] "observado por el jefe"', 'no observado'):
+            with self.subTest(receipt=receipt):
+                self.assertNotIn(gen.clase_evidencia(receipt), gen.SOLIDA)
+        self.assertIn(gen.clase_evidencia('[observado] caso T'), gen.SOLIDA)
+        self.assertIn(gen.clase_evidencia('[medido] tiempo'), gen.SOLIDA)
+
 
 if __name__ == "__main__":
     unittest.main()
